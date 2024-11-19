@@ -1,10 +1,10 @@
 <script lang="ts">
-	import { htmlOutput } from '$lib/stores/blogOutput.svelte';
+	import { blogOutput } from "$lib/components/blog/blogOutput.svelte";
 </script>
 
 <h1>Blog Preview</h1>
 <main>
 	<section>
-		{@html htmlOutput.html}
+		{@html blogOutput.html}
 	</section>
 </main>
