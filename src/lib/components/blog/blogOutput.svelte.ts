@@ -1,19 +1,21 @@
 import { Delta } from "quill/core";
 
+// TODO: Link to auth
 export const authorsRegistered = ["Jacob Druery", "Michelle Coish"];
+
+// Types ------------------------------------------------
+type BlogPostState = "posted" | "draft" | "deleted";
 
 export let blogOutput = $state({
 	title: "",
 	subtitle: "",
 	slug: "",
 	author: authorsRegistered[0],
-	date: new Date(),
+	date: (() => new Date().toISOString().split("T")[0])(),
+	postState: "draft" as BlogPostState,
 	html: "",
-	delta: new Delta(),
-	postState: "draft" as BlogPostState
+	delta: new Delta()
 });
-
-type BlogPostState = "posted" | "draft" | "deleted";
 
 export function titleToSlug(title: string) {
 	if (!title) return "";
