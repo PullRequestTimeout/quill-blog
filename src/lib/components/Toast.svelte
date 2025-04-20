@@ -1,23 +1,11 @@
 <script lang="ts">
 	import { fly } from "svelte/transition";
-	let showToast = $state(false);
-	let message = $state("");
-	export function handleToast(message: string, seconds?: number) {
-		showToast = true;
-		message = message;
-		setTimeout(
-			() => {
-				showToast = false;
-				message = "";
-			},
-			(!!seconds ? seconds : 3) * 1000
-		);
-	}
+	import { uiStore } from "$lib/stores/uiStore.svelte";
 </script>
 
-{#if showToast && message}
+{#if uiStore.alertMessage}
 	<div class="surface" transition:fly={{ y: 20, duration: 200 }}>
-		<p>{message}</p>
+		<p>{uiStore.alertMessage}</p>
 	</div>
 {/if}
 
