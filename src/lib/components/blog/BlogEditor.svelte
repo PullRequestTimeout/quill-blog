@@ -10,6 +10,17 @@
 	// Utils Imports
 	import { blogOutput, updateSlug, authorsRegistered } from "$lib/components/blog/blogOutput.svelte";
 
+	// Cloudinary Bucket
+	let cloudinaryBucket = import.meta.env.VITE_CLOUDINARY_BUCKET;
+
+	// State vars
+	let cardImage: FileList | null = $state(null);
+	let cardImageUpload: any = $state(null);
+	let heroImage: FileList | null = $state(null);
+	let heroImageUpload: any = $state(null);
+	let wordCount = $state(0);
+	let charCount = $state(0);
+
 	// Instantiate Quill editor on mount
 	onMount(() => {
 		let quill = new Quill("#editor", {
@@ -36,13 +47,12 @@
 			blogOutput.html = quill.getSemanticHTML();
 			delta = quill.getContents();
 			blogOutput.delta = delta;
+
+			const text = quill.getText().trim();
+			charCount = text.length;
+			wordCount = text === "" ? 0 : text.split(/\s+/).length;
 		});
 	});
-
-	let cardImage: FileList | null = null;
-	let cardImageUpload: any = null;
-	let heroImage: FileList | null = null;
-	let heroImageUpload: any = null;
 
 	// Handle image upload to Cloudinary
 	async function handleImage(this: any) {
@@ -67,7 +77,7 @@
 
 			// Validate size
 			if (file.size > MAX_IMAGE_SIZE) {
-				// Swap out the alert with custom UI ~~~~~~~~~~~~~~~~~~~~~~~~~~ <------------
+				// TODO: Swap out the alert with custom UI ~~~~~~~~~~~~~~~~~~~~~~~~~~ <------------
 				alert("Image is too large. Max file size is 2MB.");
 				return;
 			}
@@ -78,7 +88,7 @@
 			formData.append("upload_preset", "unsigned_blog_upload");
 
 			try {
-				const response = await fetch("https://api.cloudinary.com/v1_1/dvdwz9dpc/image/upload", {
+				const response = await fetch(`https://api.cloudinary.com/v1_1/${cloudinaryBucket}/image/upload`, {
 					method: "POST",
 					body: formData
 				});
@@ -132,6 +142,9 @@
 		</div>
 		<div class="quill-container">
 			<div id="editor"></div>
+			<div class="quill-stats">
+				<p>Word Count: {wordCount} | Character Count: {charCount}</p>
+			</div>
 		</div>
 	</section>
 
