@@ -24,6 +24,7 @@
 	},
 	"dependencies": {
 		"@types/quill": "^2.0.14",
+		"firebase": "^11.6.0",
 		"quill": "^2.0.2"
 	}
 }
