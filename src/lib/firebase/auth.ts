@@ -19,7 +19,9 @@ export const authHandlers = {
 			await createUserWithEmailAndPassword(auth, email, password);
 			if (auth.currentUser) {
 				await updateProfile(auth.currentUser, { displayName: fname });
+				handleAlertMessage("New account created successfully!");
 			} else {
+				handleAlertMessage("No user found.");
 				throw new Error("No authenticated user found.");
 			}
 		} catch (err: any) {
@@ -40,6 +42,7 @@ export const authHandlers = {
 	login: async (email: string, password: string) => {
 		try {
 			await signInWithEmailAndPassword(auth, email, password);
+			handleAlertMessage("Login successful!");
 		} catch (err: any) {
 			let errorReason = err.toString();
 			if (errorReason.includes("auth/user-not-found")) {
@@ -56,10 +59,14 @@ export const authHandlers = {
 	},
 
 	logout: () => {
-		signOut(auth).catch((error) => {
-			console.error(error);
-			handleAlertMessage("There was an error logging out. Try again.");
-		});
+		signOut(auth)
+			.then(() => {
+				handleAlertMessage("Successfully logged out.");
+			})
+			.catch((error) => {
+				console.error(error);
+				handleAlertMessage("There was an error logging out. Try again.");
+			});
 	},
 
 	resetPassword: (email: string) => {
