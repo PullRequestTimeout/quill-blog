@@ -15,6 +15,11 @@
 		<p>Welcome to your admin panel. Here you can write and manage blog posts.</p>
 		<hr />
 	</div>
+	<div class="create-post">
+		<h3>Create New Post</h3>
+		<button class="button button-primary" onclick={() => (blogEditorOpen = true)}>New Blog Post</button>
+	</div>
+	<hr />
 	<div class="draft-posts">
 		<h3>Unpublished Drafts</h3>
 		{#if blogDummyData.length === 0}
@@ -65,10 +70,6 @@
 		</ul>
 	</div>
 	<hr />
-	<div class="create-post">
-		<h3>Create New Post</h3>
-		<button class="button button-primary" onclick={() => (blogEditorOpen = true)}>New Blog Post</button>
-	</div>
 	{#if blogEditorOpen}
 		<div class="modal-overlay">
 			<div
@@ -96,8 +97,10 @@
 		gap: var(--spacing-s);
 	}
 
-	h3 {
-		margin-block: var(--spacing-m);
+	.create-post {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
 	}
 
 	ul {
@@ -154,5 +157,7 @@
 	.blog-editor-modal {
 		width: clamp(300px, 80vw, 800px);
 		margin: 2rem;
+		max-height: calc(100vh - 4rem);
+		overflow-y: auto;
 	}
 </style>
