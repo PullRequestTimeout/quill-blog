@@ -11,7 +11,7 @@ declare global {
 
 	declare namespace svelteHTML {
 		interface HTMLAttributes<T> {
-			"on:outclick"?: CompositionEventHandler<T>;
+			onoutclick?: CompositionEventHandler<T>;
 		}
 	}
 }
