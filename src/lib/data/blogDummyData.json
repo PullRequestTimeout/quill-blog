@@ -1,172 +1,156 @@
 [
-    {
-      "title": "The History of Bacon: From Farm to Fork",
-      "subtitle": "A sizzling journey through time",
-      "slug": "history-of-bacon",
-      "author": "Jacob Druery",
-      "tags": ["bacon", "history", "food"],
-      "date": "2025-04-20",
-      "postState": "published",
-      "html": "<p>Bacon has been a beloved food for centuries...</p>",
-      "delta": {
-        "ops": [{ "insert": "Bacon has been a beloved food for centuries...\n" }]
-      }
-    },
-    {
-      "title": "5 Unusual Bacon Recipes You Need to Try",
-      "subtitle": "From bacon ice cream to bacon jam",
-      "slug": "unusual-bacon-recipes",
-      "author": "Jacob Druery",
-      "tags": ["recipes", "bacon", "cooking"],
-      "date": "2025-04-20",
-      "postState": "published",
-      "html": "<p>Think bacon is only for breakfast? Think again...</p>",
-      "delta": {
-        "ops": [{ "insert": "Think bacon is only for breakfast? Think again...\n" }]
-      }
-    },
-    {
-      "title": "Bacon vs. Pancetta: What's the Difference?",
-      "subtitle": "A comparison of two crispy favourites",
-      "slug": "bacon-vs-pancetta",
-      "author": "Jacob Druery",
-      "tags": ["bacon", "pancetta", "meat"],
-      "date": "2025-04-20",
-      "postState": "published",
-      "html": "<p>Bacon and pancetta may look alike, but...</p>",
-      "delta": {
-        "ops": [{ "insert": "Bacon and pancetta may look alike, but...\n" }]
-      }
-    },
-    {
-      "title": "Is Bacon Really That Bad For You?",
-      "subtitle": "A look at the nutritional facts",
-      "slug": "is-bacon-bad",
-      "author": "Jacob Druery",
-      "tags": ["bacon", "health", "nutrition"],
-      "date": "2025-04-20",
-      "postState": "published",
-      "html": "<p>There’s no denying bacon’s flavour, but...</p>",
-      "delta": {
-        "ops": [{ "insert": "There’s no denying bacon’s flavour, but...\n" }]
-      }
-    },
-    {
-      "title": "Making the Perfect Crispy Bacon Every Time",
-      "subtitle": "Tips and tricks for that golden crunch",
-      "slug": "perfect-crispy-bacon",
-      "author": "Jacob Druery",
-      "tags": ["bacon", "cooking tips"],
-      "date": "2025-04-20",
-      "postState": "published",
-      "html": "<p>Ever wonder how to get that restaurant-style crisp?</p>",
-      "delta": {
-        "ops": [{ "insert": "Ever wonder how to get that restaurant-style crisp?\n" }]
-      }
-    },
-    {
-      "title": "The Bacon Lover’s Guide to Brunch",
-      "subtitle": "Bringing bacon to the centre of the table",
-      "slug": "bacon-brunch-guide",
-      "author": "Jacob Druery",
-      "tags": ["bacon", "brunch", "guide"],
-      "date": "2025-04-20",
-      "postState": "published",
-      "html": "<p>Nothing says brunch like a plate full of bacon...</p>",
-      "delta": {
-        "ops": [{ "insert": "Nothing says brunch like a plate full of bacon...\n" }]
-      }
-    },
-    {
-      "title": "Why Bacon Makes Everything Better",
-      "subtitle": "The science and psychology of umami",
-      "slug": "bacon-makes-everything-better",
-      "author": "Jacob Druery",
-      "tags": ["bacon", "umami", "flavour"],
-      "date": "2025-04-20",
-      "postState": "published",
-      "html": "<p>It’s more than just taste—it’s a feeling...</p>",
-      "delta": {
-        "ops": [{ "insert": "It’s more than just taste—it’s a feeling...\n" }]
-      }
-    },
-    {
-      "title": "Bacon Around the World",
-      "subtitle": "How different cultures use bacon",
-      "slug": "bacon-around-the-world",
-      "author": "Jacob Druery",
-      "tags": ["bacon", "world", "culture"],
-      "date": "2025-04-20",
-      "postState": "published",
-      "html": "<p>From American streaky to Italian guanciale...</p>",
-      "delta": {
-        "ops": [{ "insert": "From American streaky to Italian guanciale...\n" }]
-      }
-    },
-    {
-      "title": "Vegetarian Bacon Alternatives: Are They Any Good?",
-      "subtitle": "Exploring meat-free bacon options",
-      "slug": "vegetarian-bacon-alternatives",
-      "author": "Jacob Druery",
-      "tags": ["bacon", "vegetarian", "alternatives"],
-      "date": "2025-04-20",
-      "postState": "published",
-      "html": "<p>Even plant-based eaters want that smoky crunch...</p>",
-      "delta": {
-        "ops": [{ "insert": "Even plant-based eaters want that smoky crunch...\n" }]
-      }
-    },
-    {
-      "title": "Bacon Storage & Preservation Tips",
-      "subtitle": "Keep your bacon fresh and tasty longer",
-      "slug": "bacon-storage-tips",
-      "author": "Jacob Druery",
-      "tags": ["bacon", "kitchen", "preservation"],
-      "date": "2025-04-20",
-      "postState": "published",
-      "html": "<p>Proper storage is key to keeping bacon delicious...</p>",
-      "delta": {
-        "ops": [{ "insert": "Proper storage is key to keeping bacon delicious...\n" }]
-      }
-    },
-    {
-      "title": "The Ultimate Guide to Home-Cured Bacon",
-      "subtitle": "Make your own bacon from scratch",
-      "slug": "home-cured-bacon-guide",
-      "author": "Jacob Druery",
-      "tags": ["bacon", "DIY", "home curing"],
-      "date": "2025-04-20",
-      "postState": "draft",
-      "html": "<p>Turn pork belly into gourmet bacon at home...</p>",
-      "delta": {
-        "ops": [{ "insert": "Turn pork belly into gourmet bacon at home...\n" }]
-      }
-    },
-    {
-      "title": "Bacon Myths Busted",
-      "subtitle": "Separating sizzling facts from fiction",
-      "slug": "bacon-myths-busted",
-      "author": "Jacob Druery",
-      "tags": ["bacon", "myths", "facts"],
-      "date": "2025-04-20",
-      "postState": "draft",
-      "html": "<p>Is bacon really banned in some places? Let’s dive in...</p>",
-      "delta": {
-        "ops": [{ "insert": "Is bacon really banned in some places? Let’s dive in...\n" }]
-      }
-    },
-    {
-      "title": "Pairing Bacon with Beverages",
-      "subtitle": "Best drinks to complement bacon’s richness",
-      "slug": "bacon-beverage-pairings",
-      "author": "Jacob Druery",
-      "tags": ["bacon", "pairing", "drinks"],
-      "date": "2025-04-20",
-      "postState": "draft",
-      "html": "<p>From coffee to craft beer, bacon has a perfect match...</p>",
-      "delta": {
-        "ops": [{ "insert": "From coffee to craft beer, bacon has a perfect match...\n" }]
-      }
+  {
+    "title": "Ultimate Guide to Cooking Perfect Bacon",
+    "subtitle": "Timing, technique, and tools",
+    "slug": "guide-to-cooking-perfect-bacon",
+    "author": "Jacob Druery",
+    "tags": ["bacon", "cooking", "how-to"],
+    "date": "2025-04-20",
+    "postState": "draft",
+    "html": "<h2>Master the Art of Bacon</h2><p>There are many ways to cook bacon—pan-fried, baked, or even grilled. This guide walks you through each technique to ensure perfect crispiness every time. Don’t forget about thick-cut vs. regular, and how to avoid those annoying curls in the pan!</p><p>When pan-frying, use a cold skillet to start so the fat renders slowly. Flip the strips occasionally to brown evenly, and place them on paper towels to drain. For oven-baking, arrange on a wire rack over a sheet tray, bake at 400°F (205°C) for about 20 minutes. This method is less messy and works great for cooking large batches.</p>",
+    "delta": {
+      "ops": [
+        {"insert": "Master the Art of Bacon\n", "attributes": {"header": 2}},
+        {"insert": "There are many ways to cook bacon—pan-fried, baked, or even grilled. This guide walks you through each technique to ensure perfect crispiness every time. Don’t forget about thick-cut vs. regular, and how to avoid those annoying curls in the pan!\n"},
+        {"insert": "When pan-frying, use a cold skillet to start so the fat renders slowly. Flip the strips occasionally to brown evenly, and place them on paper towels to drain. For oven-baking, arrange on a wire rack over a sheet tray, bake at 400°F (205°C) for about 20 minutes. This method is less messy and works great for cooking large batches.\n"}
+      ]
     }
-  ]
-  
+  },
+  {
+    "title": "Is Bacon Healthy? Nutrition Facts & Myths",
+    "subtitle": "What the science really says",
+    "slug": "is-bacon-healthy-nutrition-myths",
+    "author": "Jacob Druery",
+    "tags": ["bacon", "health", "science"],
+    "date": "2025-04-20",
+    "postState": "draft",
+    "html": "<h2>Nutrition Deep Dive</h2><p>Bacon has long been debated in nutrition circles. It's high in fat and sodium, but also rich in protein. Moderation is key. This post breaks down common myths and explores what the latest research says about including bacon in a balanced diet.</p><p>Studies suggest processed meats like bacon may be linked to higher health risks if eaten in excess. But small amounts, especially if nitrate-free or naturally cured, can be part of a varied diet. We also look into portion sizes, sodium alternatives, and how bacon fits into ketogenic and paleo lifestyles.</p>",
+    "delta": {
+      "ops": [
+        {"insert": "Nutrition Deep Dive\n", "attributes": {"header": 2}},
+        {"insert": "Bacon has long been debated in nutrition circles. It's high in fat and sodium, but also rich in protein. Moderation is key. This post breaks down common myths and explores what the latest research says about including bacon in a balanced diet.\n"},
+        {"insert": "Studies suggest processed meats like bacon may be linked to higher health risks if eaten in excess. But small amounts, especially if nitrate-free or naturally cured, can be part of a varied diet. We also look into portion sizes, sodium alternatives, and how bacon fits into ketogenic and paleo lifestyles.\n"}
+      ]
+    }
+  },
+  {
+    "title": "Vegetarian Bacon: Can It Compete?",
+    "subtitle": "Plant-based alternatives reviewed",
+    "slug": "vegetarian-bacon-alternatives-reviewed",
+    "author": "Jacob Druery",
+    "tags": ["bacon", "vegetarian", "review"],
+    "date": "2025-04-20",
+    "postState": "draft",
+    "html": "<h2>Plant-Based Revolution</h2><p>Vegetarian bacon options have exploded in recent years. From tempeh to coconut bacon, we tried them all. Some taste surprisingly good while others fall flat. Here's our verdict on the best alternatives, with texture and flavour ratings included.</p><p>Tempeh bacon had the best texture and smoky flavour, while coconut bacon provided a sweet crunch perfect for salads. Jackfruit-based versions showed promise, though they require better seasoning. We also considered nutrition, availability, and prep time to help you find your plant-based match.</p>",
+    "delta": {
+      "ops": [
+        {"insert": "Plant-Based Revolution\n", "attributes": {"header": 2}},
+        {"insert": "Vegetarian bacon options have exploded in recent years. From tempeh to coconut bacon, we tried them all. Some taste surprisingly good while others fall flat. Here's our verdict on the best alternatives, with texture and flavour ratings included.\n"},
+        {"insert": "Tempeh bacon had the best texture and smoky flavour, while coconut bacon provided a sweet crunch perfect for salads. Jackfruit-based versions showed promise, though they require better seasoning. We also considered nutrition, availability, and prep time to help you find your plant-based match.\n"}
+      ]
+    }
+  },
+  {
+    "title": "Bacon in World Cuisine",
+    "subtitle": "How different cultures enjoy this crispy delight",
+    "slug": "bacon-in-world-cuisine",
+    "author": "Jacob Druery",
+    "tags": ["bacon", "global", "culture"],
+    "date": "2025-04-20",
+    "postState": "published",
+    "html": "<h2>Bacon Around the World</h2><p>From Italian pancetta to Korean samgyeopsal, bacon has found its place in kitchens across the globe. Each culture brings unique spice blends, preparation techniques, and serving styles that enrich the bacon experience.</p><p>In Italy, pancetta is often used in pasta dishes like carbonara. Korean barbecue highlights pork belly grilled at the table with sauces and sides. In the Philippines, sweet and garlicky tocino reflects Spanish influence. These global versions show bacon’s versatility beyond breakfast.</p>",
+    "delta": {
+      "ops": [
+        {"insert": "Bacon Around the World\n", "attributes": {"header": 2}},
+        {"insert": "From Italian pancetta to Korean samgyeopsal, bacon has found its place in kitchens across the globe. Each culture brings unique spice blends, preparation techniques, and serving styles that enrich the bacon experience.\n"},
+        {"insert": "In Italy, pancetta is often used in pasta dishes like carbonara. Korean barbecue highlights pork belly grilled at the table with sauces and sides. In the Philippines, sweet and garlicky tocino reflects Spanish influence. These global versions show bacon’s versatility beyond breakfast.\n"}
+      ]
+    }
+  },
+  {
+    "title": "Bacon Myths Busted",
+    "subtitle": "Separating fact from fiction",
+    "slug": "bacon-myths-busted",
+    "author": "Jacob Druery",
+    "tags": ["bacon", "myths", "facts"],
+    "date": "2025-04-20",
+    "postState": "published",
+    "html": "<h2>Debunking Common Misconceptions</h2><p>There are many myths surrounding bacon, from its health implications to how it should be cooked. This post aims to clarify these misconceptions and provide a clearer picture of what bacon really is.</p><p>For instance, many believe that all bacon is unhealthy. However, when consumed in moderation and as part of a balanced diet, bacon can be enjoyed without guilt. We also tackle the myth that bacon must be cooked until crispy; some prefer it chewy, and that's perfectly fine!</p>",
+    "delta": {
+      "ops": [
+        {"insert": "Debunking Common Misconceptions\n", "attributes": {"header": 2}},
+        {"insert": "There are many myths surrounding bacon, from its health implications to how it should be cooked. This post aims to clarify these misconceptions and provide a clearer picture of what bacon really is.\n"},
+        {"insert": "For instance, many believe that all bacon is unhealthy. However, when consumed in moderation and as part of a balanced diet, bacon can be enjoyed without guilt. We also tackle the myth that bacon must be cooked until crispy; some prefer it chewy, and that's perfectly fine!\n"}
+      ]
+    }
+  },
+  {
+    "title": "Bacon and Breakfast: A Perfect Pairing",
+    "subtitle": "Why bacon is the ultimate breakfast food",
+    "slug": "bacon-and-breakfast-perfect-pairing",
+    "author": "Jacob Druery",
+    "tags": ["bacon", "breakfast", "food"],
+    "date": "2025-04-20",
+    "postState": "published",
+    "html": "<h2>The Breakfast Staple</h2><p>Bacon is often hailed as the king of breakfast foods. Its savory, salty flavor pairs perfectly with eggs, pancakes, and even smoothies. This post explores why bacon deserves its place on your breakfast plate.</p><p>We discuss the science behind why we crave salty foods in the morning and how bacon's umami flavor enhances other breakfast items. Plus, we share some unique breakfast recipes that incorporate bacon in unexpected ways!</p>",
+    "delta": {
+      "ops": [
+        {"insert": "The Breakfast Staple\n", "attributes": {"header": 2}},
+        {"insert": "Bacon is often hailed as the king of breakfast foods. Its savory, salty flavor pairs perfectly with eggs, pancakes, and even smoothies. This post explores why bacon deserves its place on your breakfast plate.\n"},
+        {"insert": "We discuss the science behind why we crave salty foods in the morning and how bacon's umami flavor enhances other breakfast items. Plus, we share some unique breakfast recipes that incorporate bacon in unexpected ways!\n"}
+      ]
+    }
+  },
+  {
+    "title": "Bacon: The Ultimate Comfort Food",
+    "subtitle": "Why we love it so much",
+    "slug": "bacon-ultimate-comfort-food",
+    "author": "Jacob Druery",
+    "tags": ["bacon", "comfort-food", "love"],
+    "date": "2025-04-20",
+    "postState": "published",
+    "html": "<h2>Comfort in Every Bite</h2><p>Bacon is often associated with comfort food, and for good reason. Its rich flavor and satisfying crunch can evoke feelings of nostalgia and happiness. This post delves into the psychology behind our love for bacon.</p><p>We explore how bacon triggers the brain's reward system, releasing feel-good chemicals that enhance our mood. Plus, we share personal stories from readers about their favorite bacon memories and recipes that bring them joy.</p>",
+    "delta": {
+      "ops": [
+        {"insert": "Comfort in Every Bite\n", "attributes": {"header": 2}},
+        {"insert": "Bacon is often associated with comfort food, and for good reason. Its rich flavor and satisfying crunch can evoke feelings of nostalgia and happiness. This post delves into the psychology behind our love for bacon.\n"},
+        {"insert": "We explore how bacon triggers the brain's reward system, releasing feel-good chemicals that enhance our mood. Plus, we share personal stories from readers about their favorite bacon memories and recipes that bring them joy.\n"}
+      ]
+    }
+  },
+  {
+    "title": "Bacon: A Culinary History",
+    "subtitle": "From ancient times to modern kitchens",
+    "slug": "bacon-culinary-history",
+    "author": "Jacob Druery",
+    "tags": ["bacon", "history", "culinary"],
+    "date": "2025-04-20",
+    "postState": "published",
+    "html": "<h2>A Journey Through Time</h2><p>Bacon has a rich history that dates back thousands of years. This post takes you on a journey through time, exploring how bacon has evolved in different cultures and cuisines.</p><p>From ancient Roman times when bacon was a staple food to its modern-day status as a beloved breakfast item, we cover the key milestones in bacon's history. We also discuss how bacon production methods have changed over the years, including curing techniques and the rise of artisanal bacon makers.</p>",
+    "delta": {
+      "ops": [
+        {"insert": "A Journey Through Time\n", "attributes": {"header": 2}},
+        {"insert": "Bacon has a rich history that dates back thousands of years. This post takes you on a journey through time, exploring how bacon has evolved in different cultures and cuisines.\n"},
+        {"insert": "From ancient Roman times when bacon was a staple food to its modern-day status as a beloved breakfast item, we cover the key milestones in bacon's history. We also discuss how bacon production methods have changed over the years, including curing techniques and the rise of artisanal bacon makers.\n"}
+      ]
+    }
+  },
+  {
+    "title": "Bacon: The Science of Sizzle",
+    "subtitle": "Understanding the cooking process",
+    "slug": "bacon-science-sizzle",
+    "author": "Jacob Druery",
+    "tags": ["bacon", "science", "cooking"],
+    "date": "2025-04-20",
+    "postState": "published",
+    "html": "<h2>The Chemistry of Cooking</h2><p>Have you ever wondered why bacon sizzles and pops when it cooks? This post dives into the science behind the cooking process, explaining the Maillard reaction and how it contributes to bacon's delicious flavor.</p><p>We also discuss the importance of temperature control, fat rendering, and how different cooking methods affect the final product. Whether you're a novice cook or a seasoned chef, understanding the science of bacon can elevate your culinary skills.</p>",
+    "delta": {
+      "ops": [
+        {"insert": "The Chemistry of Cooking\n", "attributes": {"header": 2}},
+        {"insert": "Have you ever wondered why bacon sizzles and pops when it cooks? This post dives into the science behind the cooking process, explaining the Maillard reaction and how it contributes to bacon's delicious flavor.\n"},
+        {"insert": "We also discuss the importance of temperature control, fat rendering, and how different cooking methods affect the final product. Whether you're a novice cook or a seasoned chef, understanding the science of bacon can elevate your culinary skills.\n"}
+      ]
+    }
+  }
+
+]
