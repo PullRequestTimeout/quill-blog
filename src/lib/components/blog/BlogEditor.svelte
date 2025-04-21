@@ -9,6 +9,12 @@
 
 	// Utils Imports
 	import { blogOutput, updateSlug, authorsRegistered } from "$lib/components/blog/blogOutput.svelte";
+	$effect(() => {
+		console.log(JSON.stringify(blogOutput));
+	});
+
+	// UI Components
+	import { handleAlertMessage } from "$lib/stores/uiStore.svelte";
 
 	// Cloudinary Bucket
 	let cloudinaryBucket = import.meta.env.VITE_CLOUDINARY_BUCKET;
@@ -20,6 +26,7 @@
 	let heroImageUpload: any = $state(null);
 	let wordCount = $state(0);
 	let charCount = $state(0);
+	let tags: string[] = $state([]);
 
 	// Instantiate Quill editor on mount
 	onMount(() => {
@@ -71,14 +78,13 @@
 
 			// Validate type
 			if (!ALLOWED_TYPES.includes(file.type)) {
-				alert("Only JPEG, PNG, and WEBP files are allowed.");
+				handleAlertMessage("Only JPEG, PNG, and WEBP files are allowed.");
 				return;
 			}
 
 			// Validate size
 			if (file.size > MAX_IMAGE_SIZE) {
-				// TODO: Swap out the alert with custom UI ~~~~~~~~~~~~~~~~~~~~~~~~~~ <------------
-				alert("Image is too large. Max file size is 2MB.");
+				handleAlertMessage("Image is too large. Max file size is 2MB.");
 				return;
 			}
 
@@ -101,73 +107,73 @@
 					this.quill.setSelection(range.index + 1);
 				} else {
 					console.error("Cloudinary upload failed:", data);
-					alert("Image upload failed. Please try again.");
+					handleAlertMessage("Image upload failed. Please try again.");
 				}
-			} catch (err) {
+			} catch (err: any) {
 				console.error("Cloudinary upload error:", err);
-				alert("Image upload error. Please try again.");
+				handleAlertMessage("Image upload error. Please try again.");
 			}
 		};
 	}
 </script>
 
-<div class="dev-columns">
-	<section class="blog-editor">
-		<div class="blog-inputs">
-			<label>
-				Title:
-				<input name="title" type="text" oninput={updateSlug} bind:value={blogOutput.title} placeholder="Blog post title here..." required />
-			</label>
-			<p>Slug: {blogOutput.slug}</p>
-			<label>
-				Subtitle:
-				<input name="subtitle" type="text" bind:value={blogOutput.subtitle} placeholder="Blog post subtitle here..." />
-			</label>
-			<label>
-				Date:
-				<input name="date" type="date" bind:value={blogOutput.date} />
-			</label>
-			<label>
-				Author:
-				<select name="author" bind:value={blogOutput.author}>
-					{#each authorsRegistered as author}
-						<option value={author}>{author}</option>
-					{/each}
-				</select>
-			</label>
-			<label>
-				Card Image:
-				<input type="file" bind:value={cardImageUpload} bind:files={cardImage} accept="image/jpeg" />
-			</label>
+<div class="blog-editor">
+	<div class="blog-inputs">
+		<label>
+			Title:
+			<input
+				class="text-input"
+				name="title"
+				type="text"
+				oninput={updateSlug}
+				bind:value={blogOutput.title}
+				placeholder="Blog post title here..."
+				required
+			/>
+		</label>
+		<p>Slug: {blogOutput.slug}</p>
+		<label>
+			Subtitle:
+			<input class="text-input" name="subtitle" type="text" bind:value={blogOutput.subtitle} placeholder="Blog post subtitle here..." />
+		</label>
+		<label>
+			Date:
+			<input class="text-input" name="date" type="date" bind:value={blogOutput.date} />
+		</label>
+		<label>
+			Author:
+			<select name="author" bind:value={blogOutput.author}>
+				{#each authorsRegistered as author}
+					<option value={author}>{author}</option>
+				{/each}
+			</select>
+		</label>
+		<label>
+			Card Image:
+			<input type="file" bind:value={cardImageUpload} bind:files={cardImage} accept="image/jpeg" />
+		</label>
+	</div>
+	<div class="quill-container">
+		<div id="editor"></div>
+		<div class="quill-stats">
+			<p>Word Count: {wordCount} | Character Count: {charCount}</p>
 		</div>
-		<div class="quill-container">
-			<div id="editor"></div>
-			<div class="quill-stats">
-				<p>Word Count: {wordCount} | Character Count: {charCount}</p>
-			</div>
-		</div>
-	</section>
-
-	<section class="blog-object-output">
-		<h2>Blog Output</h2>
-		<pre>{JSON.stringify(blogOutput, null, 2)}</pre>
-	</section>
+	</div>
+	<div>
+		<button>Save Draft</button>
+		<button>Preview</button>
+		<button>Publish</button>
+		<button>Discard</button>
+	</div>
 </div>
 
 <style>
-	/* Dev */
-	.dev-columns {
-		display: grid;
-		grid-template-columns: 1fr 1fr;
-		grid-gap: 2rem;
-	}
-
 	#editor {
 		min-height: 300px;
 	}
 
 	.quill-container {
-		width: 50vw;
+		width: 100%;
 		position: relative;
 	}
 
