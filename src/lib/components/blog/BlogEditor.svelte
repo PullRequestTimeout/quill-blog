@@ -1,3 +1,4 @@
+<!-- This component can't be Server Side Rendered, make sure "export const ssr = false" is set in /blog/admin/+layout.js or equivalent-->
 <script lang="ts">
 	// Quill Imports
 	import Quill from "quill";
