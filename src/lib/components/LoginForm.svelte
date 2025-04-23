@@ -21,6 +21,17 @@
 			handleAlertMessage(error.message.toString());
 		});
 	}
+
+	function handleForgotPassword(event: Event) {
+		event.preventDefault();
+		if (!email) {
+			handleAlertMessage("Please enter your email address.");
+			return;
+		}
+		authHandlers.resetPassword(email).then(() => {
+			forgotPassword = false;
+		});
+	}
 </script>
 
 <form onsubmit={handleLogin} class="surface">
@@ -29,18 +40,26 @@
 		{#if !forgotPassword}
 			<h2>Welcome back</h2>
 			<label
-				>Email address:<span>*</span>
+				>Email address:<span class="required">*</span>
 				<input class="text-input" type="email" placeholder="email@example.com" bind:value={email} required />
 			</label>
 			<label
-				>Password:<span>*</span>
+				>Password:<span class="required">*</span>
 				<div class="password-input">
 					<input class="text-input" type={inputType} placeholder="**********" bind:value={password} required />
-					{#if inputType === "password"}
-						<button type="button" onclick={() => (inputType = "text")}>Show</button>
-					{:else}
-						<button type="button" onclick={() => (inputType = "password")}>Hide</button>
-					{/if}
+					<button
+						type="button"
+						onclick={(event) => {
+							event.preventDefault();
+							inputType = inputType === "password" ? "text" : "password";
+						}}
+					>
+						{#if inputType === "password"}
+							<span class="material-icons">visibility</span>
+						{:else if inputType === "text"}
+							<span class="material-icons">visibility_off</span>
+						{/if}
+					</button>
 				</div>
 			</label>
 			<label>
@@ -50,11 +69,11 @@
 			<button class="button button-link" type="button" onclick={() => (forgotPassword = true)}>Forgot Password?</button>
 		{:else if forgotPassword}
 			<label
-				>Email address:<span>*</span>
+				>Email address:<span class="required">*</span>
 				<input class="text-input" type="email" placeholder="email@example.com" bind:value={email} required />
 			</label>
 			<div>
-				<button class="button button-primary" type="submit">Send Password Reset</button>
+				<button class="button button-primary" onclick={handleForgotPassword}>Send Password Reset</button>
 				<button class="button button-link" type="button" onclick={() => (forgotPassword = false)}>Back to Login</button>
 			</div>
 		{/if}
@@ -66,12 +85,20 @@
 		width: fit-content;
 	}
 
-	label span {
+	label span.required {
 		color: var(--color-error, red);
 	}
 
 	label input {
 		margin-top: var(--spacing-s);
+	}
+
+	span.material-icons {
+		font-size: 1.5rem;
+	}
+
+	div.password-input span.material-icons {
+		transform: translateY(0.25rem);
 	}
 
 	.form-container {
