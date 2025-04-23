@@ -102,13 +102,11 @@
 	}
 
 	section.blog-body.columns {
-		grid-template-columns: 3fr 1fr;
 		gap: var(--spacing-l);
 	}
 
 	div.blog-posts-container {
 		display: grid;
-		grid-template-columns: 1fr;
 		grid-template-rows: repeat(3, 1fr);
 		gap: var(--spacing-m);
 	}
@@ -121,5 +119,29 @@
 	div.blog-card a {
 		width: fit-content;
 		margin-top: auto;
+	}
+
+	@media screen and (min-width: 768px) {
+		div.blog-posts-container {
+			grid-template-columns: repeat(2, 1fr);
+			grid-template-rows: repeat(2, 1fr);
+		}
+	}
+
+	@media screen and (min-width: 1024px) {
+		section.blog-body.columns {
+			grid-template-columns: 3fr 1fr;
+		}
+
+		div.blog-posts-container {
+			grid-template-columns: 1fr;
+			grid-template-rows: repeat(3, 1fr);
+		}
+	}
+
+	@media screen and (min-width: 1440px) {
+		section.blog-body.columns {
+			gap: var(--spacing-xl);
+		}
 	}
 </style>
