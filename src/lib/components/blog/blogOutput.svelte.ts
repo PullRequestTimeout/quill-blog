@@ -4,9 +4,20 @@ import { Delta } from "quill/core";
 export const authorsRegistered = ["Jacob Druery", "Michelle Coish"];
 
 // Types ------------------------------------------------
-type BlogPostState = "posted" | "draft" | "deleted";
+export type BlogPostState = "posted" | "draft" | "deleted";
 
-export let blogOutput = $state({
+export interface BlogPost {
+	title: string;
+	subtitle: string;
+	slug: string;
+	author: string;
+	date: string; // ISO date string
+	postState: BlogPostState;
+	html: string;
+	delta: Delta;
+}
+
+export let blogOutput: BlogPost = $state({
 	title: "",
 	subtitle: "",
 	slug: "",
