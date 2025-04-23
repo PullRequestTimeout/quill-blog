@@ -177,7 +177,11 @@ h5,
 h6 {
 	font-family: var(--font-heading), sans-serif;
 	padding: 0;
-	margin: 0;
+	margin: 0 0 1rem 0;
+}
+
+p {
+	margin-bottom: var(--spacing-s, 0.25rem);
 }
 
 *:not(h1):not(h2):not(h3):not(h4):not(h5):not(h6) {
@@ -185,7 +189,8 @@ h6 {
 }
 
 *::selection {
-	/* Selection colors */
+	color: var(--color-white, #fff);
+	background-color: var(--color-primary, #000);
 }
 
 a {
@@ -202,8 +207,7 @@ section {
 }
 
 *:focus-visible {
-	outline: 2px solid var(--color-primary);
-	outline-offset: 2px;
+	outline: 2px solid var(--color-primary, blue);
 	transition: none;
 }
 
@@ -211,11 +215,62 @@ section {
 
 .button {
 	border: none;
-	cursor: pointer;
 	white-space: nowrap;
+	width: fit-content;
+	padding: var(--spacing-s) var(--spacing-m);
+	border-radius: 0.5rem;
+	font-size: var(--font-body-s);
+	font-family: var(--font-heading, sans-serif);
+	font-weight: 700;
 }
 
-/* .surface {} */
+.button-primary {
+	color: var(--color-white, #fff);
+	background-color: var(--color-primary, #000);
+	border: 2px solid var(--color-black, #000);
+}
+
+.button-secondary {
+}
+
+.button-link {
+	color: inherit;
+	text-decoration: underline;
+	white-space: nowrap;
+	background-color: transparent;
+	padding: 0;
+	font-weight: 700;
+	border-radius: 0;
+}
+
+input {
+	accent-color: var(--color-primary);
+}
+
+.text-input {
+	border: 1px solid var(--color-black, #000);
+	border-radius: var(--spacing-s);
+	padding: var(--spacing-s);
+	width: 100%;
+	font-size: var(--font-body-s);
+	transition: border-color 0.2s ease-in-out;
+}
+
+.text-input:focus-visible {
+	border-color: var(--color-primary, blue);
+	outline: 1px solid var(--color-primary, blue);
+	transition: none;
+}
+.text-input:user-invalid {
+	border-color: var(--color-error, red);
+}
+
+.surface {
+	background-color: var(--color-white);
+	border-radius: 0.5rem;
+	box-shadow: 0 0 0.5rem rgba(0, 0, 0, 0.25);
+	padding: var(--spacing-m) var(--spacing-l);
+}
 
 /* Google maps link removal ---------------------------- */
 
