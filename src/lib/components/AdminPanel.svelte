@@ -1,12 +1,22 @@
 <script lang="ts">
+	// Quill dependencies
 	import BlogEditor from "$lib/components/blog/BlogEditor.svelte";
-	import { clickOutside } from "./utils/clickOutside";
+	import { Delta } from "quill/core";
+	import { blogOutput } from "$lib/components/blog/blogOutput.svelte";
+	import type { BlogPost, BlogPostState } from "$lib/components/blog/blogOutput.svelte";
+
+	// Utils
+	import { clickOutside } from "$lib/utils/clickOutside";
 
 	// TODO: Link to database to fetch draft posts
 	import blogDummyData from "$lib/data/blogDummyData.json";
-	console.log(blogDummyData);
-
 	let blogEditorOpen = $state(false);
+
+	function handleEdit(blog: BlogPost) {
+		// Populate the editor with blog data and open the editor
+		blogEditorOpen = true;
+		Object.assign(blogOutput, blog);
+	}
 </script>
 
 <section>
@@ -35,7 +45,12 @@
 								<p class="blog-date">{blog.date}</p>
 							</div>
 							<div>
-								<button class="button button-primary">Edit</button>
+								<button
+									class="button button-primary"
+									onclick={() => {
+										handleEdit({ ...blog, delta: blog.delta as Delta, postState: blog.postState as BlogPostState });
+									}}>Edit</button
+								>
 								<button class="button button-secondary">Delete</button>
 							</div>
 						</li>
@@ -60,7 +75,12 @@
 								<p class="blog-date">{blog.date}</p>
 							</div>
 							<div>
-								<button class="button button-primary">Edit</button>
+								<button
+									class="button button-primary"
+									onclick={() => {
+										handleEdit({ ...blog, delta: blog.delta as Delta, postState: blog.postState as BlogPostState });
+									}}>Edit</button
+								>
 								<button class="button button-secondary">Delete</button>
 							</div>
 						</li>
@@ -89,7 +109,12 @@
 </section>
 
 <style>
-	.admin-hero {
+	section {
+		/* padding: 0; */
+		width: 70%;
+	}
+
+	div.admin-hero {
 		display: flex;
 		flex-direction: column;
 		align-items: center;
@@ -97,10 +122,15 @@
 		gap: var(--spacing-s);
 	}
 
-	.create-post {
+	div.create-post {
 		display: flex;
 		justify-content: space-between;
 		align-items: center;
+	}
+
+	div.create-post h3 {
+		margin: 0;
+		transform: translateY(0.2rem);
 	}
 
 	ul {
@@ -111,7 +141,7 @@
 		padding: 0;
 	}
 
-	ul li.blog-item {
+	li.blog-item {
 		background-color: #00000009;
 		text-align: left;
 		display: flex;
@@ -122,22 +152,27 @@
 		border-radius: 2px;
 	}
 
-	ul li.blog-item:hover {
+	li.blog-item:hover {
 		background-color: #00000010;
 	}
 
-	ul li.blog-item .blog-date {
+	li.blog-item h4 {
+		margin: 0;
+		font-size: var(--font-body-l, 1.5rem);
+	}
+
+	li.blog-item .blog-date {
 		color: #505050;
 		font-style: italic;
 	}
 
 	hr {
-		width: 70%;
-		border: 1px solid #4b4b4b;
+		width: 100%;
+		border: 1px solid var(--color-black);
 		margin: 1rem auto;
 	}
 
-	.modal-overlay {
+	div.modal-overlay {
 		position: fixed;
 		top: 0;
 		left: 0;
@@ -154,7 +189,7 @@
 		pointer-events: all;
 	}
 
-	.blog-editor-modal {
+	div.blog-editor-modal {
 		width: clamp(300px, 80vw, 800px);
 		margin: 2rem;
 		max-height: calc(100vh - 4rem);
