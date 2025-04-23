@@ -1,21 +1,7 @@
 <script lang="ts">
 	import type { PageData } from "./$types";
 	export let data: PageData;
-
-	function formatDate(dateStr: string): string {
-		const [year, month, day] = dateStr.split("-").map(Number);
-
-		// month - 1 because JS months are 0-indexed
-		const date = new Date(year, month - 1, day);
-
-		const formatted = new Intl.DateTimeFormat("en-US", {
-			month: "long",
-			day: "numeric",
-			year: "numeric"
-		}).format(date);
-
-		return formatted;
-	}
+	import { formatDate } from "$lib/utils/formatDate";
 </script>
 
 <svelte:head>
@@ -23,7 +9,7 @@
 </svelte:head>
 
 <main>
-	<section>
+	<section class="blog-header">
 		<h1>Blog</h1>
 		<p>Welcome to the blog section. Here you can find all the latest posts.</p>
 		<hr />
@@ -50,6 +36,22 @@
 </main>
 
 <style>
+	.blog-header {
+		padding-block: 4rem;
+		text-align: center;
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+	}
+
+	.blog-header h1 {
+		font-size: var(--font-heading-m, 2.5rem);
+	}
+	.blog-header hr {
+		width: 20%;
+		margin-top: 1rem;
+	}
+
 	.blog-posts-container {
 		display: grid;
 		grid-template-columns: repeat(1, 1fr);
@@ -73,10 +75,6 @@
 
 	.blog-card p span {
 		font-style: italic;
-	}
-
-	.blog-card > p {
-		margin-bottom: var(--spacing-l);
 	}
 
 	.blog-card a {
