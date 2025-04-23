@@ -69,15 +69,14 @@ export const authHandlers = {
 			});
 	},
 
-	resetPassword: (email: string) => {
-		sendPasswordResetEmail(auth, email)
-			.then(() => {
-				handleAlertMessage("Password reset email sent.");
-			})
-			.catch((error) => {
-				console.error(error);
-				handleAlertMessage("There was an error sending the password reset email.");
-			});
+	resetPassword: async (email: string) => {
+		try {
+			await sendPasswordResetEmail(auth, email);
+			handleAlertMessage("Password reset email sent. Make sure to check your spam folder.", 5);
+		} catch (err: any) {
+			console.error(err);
+			handleAlertMessage("There was an error sending the password reset email.");
+		}
 	},
 
 	resendEmailVerification: () => {
