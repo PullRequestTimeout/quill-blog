@@ -1,9 +1,9 @@
 <script lang="ts">
 	import { onMount } from "svelte";
 	import Toast from "$lib/components/Toast.svelte";
-	// import handleToast from "$lib/components/Toast.svelte";
 	import { uiStore } from "$lib/stores/uiStore.svelte";
 	import { auth } from "$lib/firebase/firebase";
+	import "material-icons/iconfont/filled.css";
 
 	onMount(() => {
 		uiStore.loading = true;
