@@ -108,6 +108,7 @@ button {
 	/* Spacing */
 	--padding-inline: 1rem;
 	--padding-block: 2rem;
+	--spacing-xs: 0.25rem;
 	--spacing-s: 0.5rem;
 	--spacing-m: 1rem;
 	--spacing-l: 2rem;
@@ -217,11 +218,31 @@ section {
 	border: none;
 	white-space: nowrap;
 	width: fit-content;
-	padding: var(--spacing-s) var(--spacing-m);
+	padding: var(--spacing-xs) var(--spacing-s);
 	border-radius: 0.5rem;
 	font-size: var(--font-body-s);
 	font-family: var(--font-heading, sans-serif);
 	font-weight: 700;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: var(--spacing-xs);
+}
+
+@media screen and (min-width: 768px) {
+	.button {
+		padding: var(--spacing-s) var(--spacing-m);
+	}
+}
+
+.button:focus-visible {
+	outline: 2px solid var(--color-primary, blue);
+	transition: outline 0s;
+}
+
+.button:disabled {
+	opacity: 0.5;
+	cursor: not-allowed;
 }
 
 .button-primary {
