@@ -12,7 +12,7 @@
 		<LoginForm />
 	{:else if uiStore.loggedIn}
 		<AdminPanel />
-		<button class="logout button button-primary" onclick={() => authHandlers.logout()}>Log Out</button>
+		<button class="logout button button-primary" onclick={() => authHandlers.logout()}><span class="material-icons">logout</span>Log Out</button>
 	{/if}
 </main>
 
