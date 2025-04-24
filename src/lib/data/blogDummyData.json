@@ -142,7 +142,7 @@
     "author": "Jacob Druery",
     "tags": ["bacon", "science", "cooking"],
     "date": "2025-04-20",
-    "postState": "published",
+    "postState": "deleted",
     "html": "<h2>The Chemistry of Cooking</h2><p>Have you ever wondered why bacon sizzles and pops when it cooks? This post dives into the science behind the cooking process, explaining the Maillard reaction and how it contributes to bacon's delicious flavor.</p><p>We also discuss the importance of temperature control, fat rendering, and how different cooking methods affect the final product. Whether you're a novice cook or a seasoned chef, understanding the science of bacon can elevate your culinary skills.</p>",
     "delta": {
       "ops": [
