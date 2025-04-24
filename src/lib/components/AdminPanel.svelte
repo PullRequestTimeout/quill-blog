@@ -1,21 +1,40 @@
 <script lang="ts">
-	// Quill dependencies
+	// Quill blog dependencies
 	import BlogEditor from "$lib/components/blog/BlogEditor.svelte";
-	import { Delta } from "quill/core";
 	import { blogOutput } from "$lib/components/blog/blogOutput.svelte";
+	import { Delta } from "quill/core";
 	import type { BlogPost, BlogPostState } from "$lib/components/blog/blogOutput.svelte";
+
+	// Components
+	import { handleAlertMessage } from "$lib/stores/uiStore.svelte";
+	import Confirmation from "$lib/components/Confirmation.svelte";
 
 	// Utils
 	import { clickOutside } from "$lib/utils/clickOutside";
 
 	// TODO: Link to database to fetch draft posts
 	import blogDummyData from "$lib/data/blogDummyData.json";
-	let blogEditorOpen = $state(false);
 
+	// Edit blog post functionality
+	let blogEditorOpen = $state(false);
 	function handleEdit(blog: BlogPost) {
 		// Populate the editor with blog data and open the editor
 		blogEditorOpen = true;
 		Object.assign(blogOutput, blog);
+	}
+
+	// Delete blog post functionality
+	let confirmationOpen = $state(false);
+	let confirmFunc = $state(() => {});
+	let confirmMessage = $state("Are you sure you want to delete this post?");
+	let bodyMessage = $state("");
+	function handleDelete(blog: BlogPost) {
+		// Open the confirmation dialog
+		confirmationOpen = true;
+		bodyMessage = blog.title;
+		confirmFunc = () => {
+			handleAlertMessage(`Deleted blog post: ${blog.title}`, 5);
+		};
 	}
 </script>
 
@@ -27,7 +46,7 @@
 	</div>
 	<div class="create-post">
 		<h3>Create New Post</h3>
-		<button class="button button-primary" onclick={() => (blogEditorOpen = true)}>New Blog Post</button>
+		<button class="button button-primary" onclick={() => (blogEditorOpen = true)}><span class="material-icons">add</span>New Blog Post</button>
 	</div>
 	<hr />
 	<div class="draft-posts">
@@ -44,14 +63,18 @@
 								<p>{blog.subtitle}</p>
 								<p class="blog-date">{blog.date}</p>
 							</div>
-							<div>
+							<div class="blog-actions">
 								<button
 									class="button button-primary"
 									onclick={() => {
 										handleEdit({ ...blog, delta: blog.delta as Delta, postState: blog.postState as BlogPostState });
-									}}>Edit</button
+									}}><span class="material-icons">edit</span>Edit</button
 								>
-								<button class="button button-secondary">Delete</button>
+								<button
+									class="button button-secondary"
+									onclick={() => handleDelete({ ...blog, delta: blog.delta as Delta, postState: blog.postState as BlogPostState })}
+									><span class="material-icons">delete</span>Delete</button
+								>
 							</div>
 						</li>
 					{/if}
@@ -74,14 +97,18 @@
 								<p>{blog.subtitle}</p>
 								<p class="blog-date">{blog.date}</p>
 							</div>
-							<div>
+							<div class="blog-actions">
 								<button
 									class="button button-primary"
 									onclick={() => {
 										handleEdit({ ...blog, delta: blog.delta as Delta, postState: blog.postState as BlogPostState });
-									}}>Edit</button
+									}}><span class="material-icons">edit</span>Edit</button
 								>
-								<button class="button button-secondary">Delete</button>
+								<button
+									class="button button-secondary"
+									onclick={() => handleDelete({ ...blog, delta: blog.delta as Delta, postState: blog.postState as BlogPostState })}
+									><span class="material-icons">delete</span>Delete</button
+								>
 							</div>
 						</li>
 					{/if}
@@ -101,17 +128,24 @@
 					}
 				}}
 			>
-				<button class="button button-secondary" onclick={() => (blogEditorOpen = false)}>Close</button>
+				<button
+					class="button button-secondary"
+					onclick={() => {
+						if (blogEditorOpen) {
+							blogEditorOpen = false;
+						}
+					}}>Close</button
+				>
 				<BlogEditor />
 			</div>
 		</div>
 	{/if}
 </section>
+<Confirmation bind:open={confirmationOpen} {confirmFunc} message={confirmMessage} body={bodyMessage} />
 
 <style>
 	section {
-		/* padding: 0; */
-		width: 70%;
+		width: 100%;
 	}
 
 	div.admin-hero {
@@ -147,7 +181,7 @@
 		display: flex;
 		justify-content: space-between;
 		gap: var(--spacing-m);
-		align-items: center;
+		/* align-items: center; */
 		padding: 1rem;
 		border-radius: 2px;
 	}
@@ -164,6 +198,14 @@
 	li.blog-item .blog-date {
 		color: #505050;
 		font-style: italic;
+	}
+
+	li.blog-item div.blog-actions {
+		display: flex;
+		flex-direction: column;
+		justify-content: center;
+		align-items: flex-end;
+		gap: var(--spacing-s);
 	}
 
 	hr {
@@ -190,9 +232,16 @@
 	}
 
 	div.blog-editor-modal {
-		width: clamp(300px, 80vw, 800px);
-		margin: 2rem;
+		width: clamp(300px, calc(100vw - calc(var(--padding-inline, 1rem)) * 2), 1200px);
 		max-height: calc(100vh - 4rem);
 		overflow-y: auto;
+	}
+
+	@media screen and (min-width: 768px) {
+		li.blog-item div.blog-actions {
+			flex-direction: row;
+			justify-content: flex-end;
+			align-items: center;
+		}
 	}
 </style>
