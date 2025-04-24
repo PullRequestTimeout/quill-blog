@@ -2,6 +2,7 @@
 	// Imports
 	import { authHandlers } from "$lib/firebase/auth";
 	import { handleAlertMessage } from "$lib/stores/uiStore.svelte";
+	import { onMount } from "svelte";
 
 	// State management
 	let email: string = $state("");
@@ -13,6 +14,8 @@
 
 	function handleLogin(event: Event) {
 		event.preventDefault();
+		// Reme
+		handleRememberUser();
 		if (!email || !password) {
 			handleAlertMessage("Please fill in all fields.");
 			return;
@@ -32,6 +35,22 @@
 			forgotPassword = false;
 		});
 	}
+
+	function handleRememberUser() {
+		if (rememberUser) {
+			localStorage.setItem("email", email);
+		} else {
+			localStorage.removeItem("email");
+		}
+	}
+
+	onMount(() => {
+		const storedEmail = localStorage.getItem("email");
+		if (storedEmail) {
+			email = storedEmail;
+			rememberUser = true;
+		}
+	});
 </script>
 
 <form onsubmit={handleLogin} class="surface">
@@ -63,16 +82,27 @@
 				</div>
 			</label>
 			<label>
-				<input type="checkbox" bind:checked={rememberUser} /> Remember me
+				<input
+					type="checkbox"
+					bind:checked={rememberUser}
+					onchange={() => {
+						if (rememberUser === false) {
+							email = "";
+						}
+					}}
+				/> Remember me
 			</label>
-			<button class="button button-primary" type="submit">Log In</button>
-			<button class="button button-link" type="button" onclick={() => (forgotPassword = true)}>Forgot Password?</button>
+			<div class="login-actions">
+				<button class="button button-primary" type="submit">Log In</button>
+				<button class="button button-link" type="button" onclick={() => (forgotPassword = true)}>Forgot Password?</button>
+			</div>
 		{:else if forgotPassword}
+			<h2>Reset Password</h2>
 			<label
 				>Email address:<span class="required">*</span>
 				<input class="text-input" type="email" placeholder="email@example.com" bind:value={email} required />
 			</label>
-			<div>
+			<div class="login-actions">
 				<button class="button button-primary" onclick={handleForgotPassword}>Send Password Reset</button>
 				<button class="button button-link" type="button" onclick={() => (forgotPassword = false)}>Back to Login</button>
 			</div>
@@ -83,6 +113,10 @@
 <style>
 	form {
 		width: fit-content;
+	}
+
+	form h2 {
+		text-align: center;
 	}
 
 	label span.required {
@@ -101,17 +135,17 @@
 		transform: translateY(0.25rem);
 	}
 
-	.form-container {
+	div.form-container {
 		display: flex;
 		flex-direction: column;
 		gap: var(--spacing-m);
 	}
 
-	.password-input {
+	div.password-input {
 		position: relative;
 	}
 
-	.password-input button {
+	div.password-input button {
 		position: absolute;
 		right: var(--spacing-s, 0.25rem);
 		top: 50%;
@@ -119,5 +153,13 @@
 		background: none;
 		border: none;
 		cursor: pointer;
+	}
+
+	div.login-actions {
+		display: flex;
+		flex-direction: column;
+		justify-content: center;
+		align-items: center;
+		gap: var(--spacing-m);
 	}
 </style>
