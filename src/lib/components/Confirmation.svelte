@@ -1,10 +1,16 @@
 <script lang="ts">
 	import { clickOutside } from "$lib/utils/clickOutside";
-	let { open = $bindable(), confirmFunc, message, body }: { open: boolean; confirmFunc: () => void; message?: string; body?: string } = $props();
+	let {
+		confirmationOpen = $bindable(false),
+		confirmFunc,
+		message,
+		body
+	}: { confirmationOpen: boolean; confirmFunc: () => void; message?: string; body?: string } = $props();
 	let dialog: HTMLDialogElement;
 
 	$effect(() => {
-		if (!!open) {
+		if (!dialog) return;
+		if (!!confirmationOpen) {
 			dialog.showModal();
 		} else {
 			dialog.close();
@@ -12,12 +18,12 @@
 	});
 
 	function handleConfirm() {
-		open = false;
+		confirmationOpen = false;
 		confirmFunc();
 	}
 
 	function handleCancel() {
-		open = false;
+		confirmationOpen = false;
 	}
 </script>
 
