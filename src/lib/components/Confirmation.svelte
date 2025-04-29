@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { clickOutside } from "$lib/utils/clickOutside";
 	let {
 		confirmationOpen = $bindable(false),
 		confirmFunc,
@@ -28,18 +27,16 @@
 </script>
 
 <dialog class="surface" bind:this={dialog}>
-	<div use:clickOutside onoutclick={handleCancel}>
-		<h2>Are you sure?</h2>
-		{#if !!message}
-			<p>{!!message ? message : "This action cannot be undone."}</p>
-		{/if}
-		{#if !!body}
-			<p class="body">{body}</p>
-		{/if}
-		<div class="dialog-actions">
-			<button class="button button-primary" onclick={handleCancel}><span class="material-icons">close</span>Cancel</button>
-			<button class="button button-secondary" onclick={handleConfirm}><span class="material-icons">check</span>Confirm</button>
-		</div>
+	<h2>Are you sure?</h2>
+	{#if !!message}
+		<p>{!!message ? message : "This action cannot be undone."}</p>
+	{/if}
+	{#if !!body}
+		<p class="body">{body}</p>
+	{/if}
+	<div class="dialog-actions">
+		<button class="button button-primary" onclick={handleCancel}><span class="material-icons">close</span>Cancel</button>
+		<button class="button button-secondary" onclick={handleConfirm}><span class="material-icons">check</span>Confirm</button>
 	</div>
 </dialog>
 
