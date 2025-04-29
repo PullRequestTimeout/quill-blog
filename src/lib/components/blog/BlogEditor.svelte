@@ -1,21 +1,36 @@
-<!-- This component can't be Server Side Rendered, make sure "export const ssr = false" is set in /blog/admin/+layout.js or equivalent-->
+<!-- This component can't be Server Side Rendered, make sure "export const ssr = false" is set in /blog/admin/+layout.ts or equivalent-->
 <script lang="ts">
 	// Quill Imports
 	import Quill from "quill";
-	import type { Delta } from "quill/core";
+	import { Delta } from "quill/core";
 	import "quill/dist/quill.snow.css";
+
+	import blogDummyData from "$lib/data/blogDummyData.json";
+
+	// Props
+	let { blogEditorOpen = $bindable(false) }: { blogEditorOpen: boolean } = $props();
+	let dialog: HTMLDialogElement;
+	$effect(() => {
+		if (!dialog) return;
+		if (!!blogEditorOpen) {
+			dialog.showModal();
+		} else {
+			dialog.close();
+		}
+	});
 
 	// Svelte Imports
 	import { onMount } from "svelte";
+	import { fade } from "svelte/transition";
 
 	// Utils Imports
 	import { blogOutput, updateSlug, authorsRegistered } from "$lib/components/blog/blogOutput.svelte";
-	$effect(() => {
-		console.log(JSON.stringify(blogOutput));
-	});
+	import type { BlogPostState, BlogPost } from "$lib/components/blog/blogOutput.svelte";
+	import { clickOutside } from "$lib/utils/clickOutside";
 
 	// UI Components
 	import { handleAlertMessage } from "$lib/stores/uiStore.svelte";
+	import Confirmation from "$lib/components/Confirmation.svelte";
 
 	// Cloudinary Bucket
 	let cloudinaryBucket = import.meta.env.VITE_CLOUDINARY_BUCKET;
@@ -116,80 +131,259 @@
 			}
 		};
 	}
+
+	// TODO: This can be improved using the new checkIfSaved function
+	function handleClose() {
+		// Check if input fields are empty, if they aren't, check if the current blog output is different from any of the blog posts in the database
+		// If it is, show confirmation dialog to discard changes
+		if (blogOutput.title || blogOutput.subtitle || blogOutput.slug || blogOutput.html) {
+			handleConfirm("Are you sure you want to discard post?", () => {
+				handleClearEditor();
+				blogEditorOpen = false;
+			});
+		} else {
+			// Compare blogOutput with blogDummyData to see if they are the same
+			const isSame = blogDummyData.some((blog) => {
+				return (
+					blog.title === blogOutput.title &&
+					blog.subtitle === blogOutput.subtitle &&
+					blog.slug === blogOutput.slug &&
+					blog.html === blogOutput.html &&
+					blog.delta === blogOutput.delta
+				);
+			});
+			if (isSame || (!blogOutput.title && !blogOutput.subtitle && !blogOutput.slug && !blogOutput.html)) {
+				// If they are the same, or if all fields are empty, close the editor without confirmation
+				blogEditorOpen = false;
+				handleClearEditor();
+			} else {
+				handleConfirm("Are you sure you want to quit without saving?", () => {
+					handleClearEditor();
+					blogEditorOpen = false;
+				});
+			}
+		}
+	}
+
+	function handleClearEditor() {
+		Object.assign(blogOutput, {
+			title: "",
+			subtitle: "",
+			slug: "",
+			author: authorsRegistered[0],
+			date: (() => new Date().toISOString().split("T")[0])(),
+			postState: "draft" as BlogPostState,
+			html: "",
+			delta: new Delta()
+		});
+	}
+
+	// Confirmation dialog
+	let confirmationOpen = $state(false);
+	let confirmFunc = $state(() => {});
+	let confirmMessage = $state("");
+	let bodyMessage: string | undefined = $state("");
+	function handleConfirm(message: string, func: () => void, body?: string) {
+		confirmationOpen = true;
+		confirmMessage = message;
+		body ? (bodyMessage = body) : (bodyMessage = "");
+		confirmFunc = () => {
+			func();
+		};
+	}
+
+	function handleDiscard() {
+		if (blogOutput.title || blogOutput.subtitle || blogOutput.slug || blogOutput.html) {
+			handleConfirm("Are you sure you want to quit without saving?", () => {
+				handleClearEditor();
+				blogEditorOpen = false;
+			});
+		} else {
+			handleClearEditor();
+			blogEditorOpen = false;
+		}
+	}
+
+	function checkIfSaved(currentSaved: any, blogOutput: any) {
+		return currentSaved.some((blog: any) => {
+			return (
+				blog.slug === blogOutput.slug &&
+				blog.title === blogOutput.title &&
+				blog.subtitle === blogOutput.subtitle &&
+				blog.html === blogOutput.html &&
+				blog.postState === blogOutput.postState &&
+				blog.author === blogOutput.author &&
+				blog.date === blogOutput.date &&
+				JSON.stringify(blog.tags) === JSON.stringify(blogOutput.tags) &&
+				JSON.stringify(blog.delta) === JSON.stringify(blogOutput.delta)
+			);
+		});
+	}
 </script>
 
-<div class="blog-editor">
-	<div class="blog-inputs">
-		<label>
-			Title:
-			<input
-				class="text-input"
-				name="title"
-				type="text"
-				oninput={updateSlug}
-				bind:value={blogOutput.title}
-				placeholder="Blog post title here..."
-				required
-			/>
-		</label>
-		<p>Slug: {blogOutput.slug}</p>
-		<label>
-			Subtitle:
-			<input class="text-input" name="subtitle" type="text" bind:value={blogOutput.subtitle} placeholder="Blog post subtitle here..." />
-		</label>
-		<label>
-			Date:
-			<input class="text-input" name="date" type="date" bind:value={blogOutput.date} />
-		</label>
-		<label>
-			Author:
-			<select name="author" bind:value={blogOutput.author}>
-				{#each authorsRegistered as author}
-					<option value={author}>{author}</option>
-				{/each}
-			</select>
-		</label>
-		<label>
-			Card Image:
-			<input type="file" bind:value={cardImageUpload} bind:files={cardImage} accept="image/jpeg" />
-		</label>
-	</div>
-	<div class="quill-container">
-		<div id="editor"></div>
-		<div class="quill-stats">
-			<p>Word Count: {wordCount} | Character Count: {charCount}</p>
+<dialog class="blog-editor surface" bind:this={dialog} transition:fade={{ duration: 100 }}>
+	<div use:clickOutside onoutclick={handleClose}>
+		<button class="button close" onclick={handleClose}><span class="material-icons">close</span></button>
+		<h3>Blog Post Editor</h3>
+		<div class="blog-inputs">
+			<label class="blog-input-labels">
+				Title:
+				<input
+					class="text-input"
+					name="title"
+					type="text"
+					oninput={updateSlug}
+					bind:value={blogOutput.title}
+					placeholder="Blog post title here..."
+					required
+				/>
+				<span class="blog-slug">Slug: {blogOutput.slug}</span>
+			</label>
+			<label class="blog-input-labels">
+				Subtitle:
+				<input class="text-input" name="subtitle" type="text" bind:value={blogOutput.subtitle} placeholder="Blog post subtitle here..." />
+			</label>
+			<label class="blog-input-labels button button-primary">
+				<span class="material-icons">upload</span>
+				Upload Hero Image
+				<input type="file" bind:value={cardImageUpload} bind:files={cardImage} accept="image/jpeg" />
+			</label>
+		</div>
+		<div class="quill-container">
+			<div id="editor"></div>
+			<p class="quill-stats">Word Count: {wordCount} | Character Count: {charCount}</p>
+		</div>
+		<div class="blog-actions">
+			<button class="button" onclick={() => console.log(checkIfSaved(blogDummyData, $state.snapshot(blogOutput)))}
+				><span class="material-icons">save</span>Save Draft</button
+			>
+			<button class="button"><span class="material-icons">preview</span>Preview</button>
+			<button class="button" onclick={handleDiscard}><span class="material-icons">delete</span>Discard</button>
+			<button class="button button-primary"><span class="material-icons">publish</span>Publish</button>
 		</div>
 	</div>
-	<div>
-		<button>Save Draft</button>
-		<button>Preview</button>
-		<button>Publish</button>
-		<button>Discard</button>
-	</div>
-</div>
+	<Confirmation bind:confirmationOpen {confirmFunc} message={confirmMessage} body={bodyMessage} />
+</dialog>
 
 <style>
 	#editor {
 		min-height: 300px;
+		border: 1px solid var(--color-black, #000);
+		border-radius: 0 0 0.5rem 0.5rem;
 	}
 
-	.quill-container {
+	:global(.ql-toolbar.ql-snow) {
+		border: 1px solid var(--color-black, #000);
+		border-radius: 0.5rem 0.5rem 0 0;
+		border-bottom: none;
+	}
+
+	dialog.blog-editor {
+		margin: auto;
+		border: none;
+		width: clamp(300px, calc(100vw - calc(var(--padding-inline, 1rem)) * 2), 1200px);
+		max-height: calc(100vh - 4rem);
+		overflow-y: auto;
+		scrollbar-width: thin;
+		scrollbar-color: var(--color-primary, #000) var(--color-white, #fff);
+		/* padding: var(--spacing-m); */
+		padding: 0;
+	}
+
+	dialog.blog-editor > div {
+		width: 100%;
+		height: 100%;
+		padding: var(--spacing-m);
+	}
+
+	dialog.blog-editor::backdrop {
+		background-color: rgba(0, 0, 0, 0.5);
+		cursor: pointer;
+	}
+
+	dialog.blog-editor::-webkit-scrollbar {
+		width: 9px;
+	}
+
+	dialog.blog-editor::-webkit-scrollbar-track {
+		background-color: var(--color-white, #fff);
+		border-radius: 5px;
+	}
+
+	dialog.blog-editor::-webkit-scrollbar-thumb {
+		border-radius: 5px;
+		background-color: var(--color-primary, #000);
+	}
+
+	button.close {
+		position: absolute;
+		top: 1rem;
+		right: 1rem;
+		background-color: transparent;
+		border: none;
+		cursor: pointer;
+		transition:
+			background-color 0.2s,
+			color 0.2s;
+	}
+
+	button.close:hover,
+	button.close:focus {
+		background-color: var(--color-primary, #000);
+		color: var(--color-white, #fff);
+	}
+
+	div.quill-container {
 		width: 100%;
 		position: relative;
+		margin-block: 1rem;
 	}
 
-	.blog-inputs {
+	div.blog-inputs {
 		display: grid;
 		grid-template-columns: 1fr;
 		grid-gap: 1rem;
 	}
 
-	:global(.ql-container) {
-		height: calc(100% - 42px);
+	input[type="file"] {
+		display: none;
 	}
 
-	:global(.ql-toolbar span),
-	* {
+	/* label.upload-button {
+	} */
+
+	div.blog-inputs label {
+		font-weight: 700;
+	}
+
+	div.blog-inputs input,
+	div.blog-inputs span {
+		font-weight: 400;
+		margin-top: var(--spacing-xs);
+	}
+
+	p.quill-stats,
+	.blog-slug {
+		font-size: 0.75rem;
+		opacity: 0.8;
+	}
+
+	div.blog-actions {
+		display: grid;
+		grid-template-columns: repeat(2, 1fr);
+		gap: var(--spacing-m);
+	}
+
+	div.blog-actions button {
+		width: 100%;
+	}
+
+	:global(.ql-container) {
+		height: calc(100% - 42px);
+		font-size: var(--font-body-s);
+	}
+
+	:global(.ql-toolbar span) {
 		color: var(--font-color, #000);
 		font-family: var(--font-body, sans-serif);
 	}
@@ -204,5 +398,15 @@
 
 	:global(.ql-snow .ql-picker-item) {
 		color: var(--font-color, #4b4b4b);
+	}
+
+	@media screen and (min-width: 768px) {
+		dialog.blog-editor > div {
+			padding: var(--spacing-m) var(--spacing-l);
+		}
+
+		div.blog-inputs {
+			grid-template-columns: 1fr 1fr;
+		}
 	}
 </style>
