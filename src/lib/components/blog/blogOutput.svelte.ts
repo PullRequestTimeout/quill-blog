@@ -31,10 +31,15 @@ export let blogOutput: BlogPost = $state({
 export function titleToSlug(title: string) {
 	if (!title) return "";
 	return title
-		.trim() // Remove spaces at the beginning and end of the string
-		.toLowerCase()
-		.replace(/ /g, "-")
-		.replace(/[^\w-]+/g, "");
+		.toString() // Cast to string (optional)
+		.normalize("NFKD") // The normalize() using NFKD method returns the Unicode Normalization Form of a given string.
+		.toLowerCase() // Convert the string to lowercase letters
+		.trim() // Remove whitespace from both sides of a string (optional)
+		.replace(/\s+/g, "-") // Replace spaces with -
+		.replace(/[^\w\-]+/g, "") // Remove all non-word chars
+		.replace(/\_/g, "-") // Replace _ with -
+		.replace(/\-\-+/g, "-") // Replace multiple - with single -
+		.replace(/\-$/g, ""); // Remove trailing -
 }
 
 // TODO: Ensure when loading a draft, the slug is set to the correct value
