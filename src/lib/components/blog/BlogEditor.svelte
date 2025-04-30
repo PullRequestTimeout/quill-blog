@@ -341,7 +341,7 @@
 		overflow-y: auto;
 		scrollbar-width: thin;
 		scrollbar-color: var(--color-primary, #000) var(--color-white, #fff);
-		padding: 0;
+		padding: var(--spacing-m);
 	}
 
 	dialog.blog-editor div.toast-message {
@@ -353,12 +353,6 @@
 		transform: translateX(-50%);
 		z-index: 1000;
 		text-align: center;
-	}
-
-	dialog.blog-editor > div {
-		width: 100%;
-		height: 100%;
-		padding: var(--spacing-m);
 	}
 
 	dialog.blog-editor::backdrop {
@@ -466,7 +460,7 @@
 	}
 
 	@media screen and (min-width: 768px) {
-		dialog.blog-editor > div {
+		dialog.blog-editor {
 			padding: var(--spacing-m) var(--spacing-l);
 		}
 
