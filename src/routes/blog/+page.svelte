@@ -1,6 +1,9 @@
 <script lang="ts">
+	// Import blog posts
 	import type { PageData } from "./$types";
-	export let data: PageData;
+	const { data }: { data: PageData } = $props();
+
+	// Import utils
 	import { formatDate } from "$lib/utils/formatDate";
 </script>
 
@@ -17,7 +20,7 @@
 	<section>
 		<h2>Latest Articles</h2>
 		<div class="blog-posts-container">
-			{#each data.posts as post}
+			{#each data.publishedBlogPosts as post}
 				<div class="blog-card surface">
 					<!-- <img src={post.cardImage} alt={post.title} /> -->
 					<div>
