@@ -4,9 +4,10 @@ import { Delta } from "quill/core";
 export const authorsRegistered = ["Jacob Druery", "Michelle Coish"];
 
 // Types ------------------------------------------------
-export type BlogPostState = "posted" | "draft" | "deleted";
+export type BlogPostState = "published" | "draft" | "deleted";
 
 export interface BlogPost {
+	version?: number;
 	title: string;
 	subtitle: string;
 	slug: string;
@@ -18,11 +19,16 @@ export interface BlogPost {
 }
 
 export let blogOutput: BlogPost = $state({
+	version: 1,
 	title: "",
 	subtitle: "",
 	slug: "",
 	author: authorsRegistered[0],
-	date: (() => new Date().toISOString().split("T")[0])(),
+	date: new Date().toLocaleDateString("en-CA", {
+		year: "numeric",
+		month: "2-digit",
+		day: "2-digit"
+	}),
 	postState: "draft" as BlogPostState,
 	html: "",
 	delta: new Delta()
