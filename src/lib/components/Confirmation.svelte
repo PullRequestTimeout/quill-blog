@@ -8,7 +8,6 @@
 	let dialog: HTMLDialogElement;
 
 	$effect(() => {
-		if (!dialog) return;
 		if (!!confirmationOpen) {
 			dialog.showModal();
 		} else {
