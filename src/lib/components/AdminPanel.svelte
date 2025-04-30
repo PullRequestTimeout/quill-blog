@@ -1,17 +1,18 @@
 <script lang="ts">
+	import { slide } from "svelte/transition";
+
 	// Quill blog dependencies
 	import BlogEditor from "$lib/components/blog/BlogEditor.svelte";
 	import { blogOutput } from "$lib/components/blog/blogOutput.svelte";
 	import { Delta } from "quill/core";
 	import type { BlogPost, BlogPostState } from "$lib/components/blog/blogOutput.svelte";
 
-	// Components
+	// Components & Utils
 	import { handleAlertMessage } from "$lib/stores/uiStore.svelte";
 	import Confirmation from "$lib/components/Confirmation.svelte";
+	import { formatDate } from "$lib/utils/formatDate";
 
-	// Utils
-	import { clickOutside } from "$lib/utils/clickOutside";
-
+	import { databaseHandlers } from "$lib/firebase/db";
 	// TODO: Link to database to fetch draft posts
 	import blogDummyData from "$lib/data/blogDummyData.json";
 
@@ -19,8 +20,8 @@
 	let blogEditorOpen = $state(false);
 	function handleEdit(blog: BlogPost) {
 		// Populate the editor with blog data and open the editor
-		blogEditorOpen = true;
 		Object.assign(blogOutput, blog);
+		blogEditorOpen = true;
 	}
 
 	// Delete blog post functionality
@@ -34,6 +35,22 @@
 		bodyMessage = blog.title;
 		confirmFunc = () => {
 			handleAlertMessage(`Deleted blog post: ${blog.title}`, 5);
+		};
+	}
+
+	let displayDeletedPosts = $state(false);
+	function toggleDeletedPosts() {
+		displayDeletedPosts = !displayDeletedPosts;
+	}
+
+	// Restore blog post functionality
+	function handleRestore(blog: BlogPost) {
+		// Open the confirmation dialog
+		confirmationOpen = true;
+		confirmMessage = "Are you sure you want to restore this post to drafts?";
+		bodyMessage = blog.title;
+		confirmFunc = () => {
+			databaseHandlers.restoreBlogPost(blog);
 		};
 	}
 </script>
@@ -61,7 +78,7 @@
 							<div>
 								<h4>{blog.title}</h4>
 								<p>{blog.subtitle}</p>
-								<p class="blog-date">{blog.date}</p>
+								<p class="blog-date">{formatDate(blog.date)}</p>
 							</div>
 							<div class="blog-actions">
 								<button
@@ -95,7 +112,7 @@
 							<div>
 								<h4>{blog.title}</h4>
 								<p>{blog.subtitle}</p>
-								<p class="blog-date">{blog.date}</p>
+								<p class="blog-date">{formatDate(blog.date)}</p>
 							</div>
 							<div class="blog-actions">
 								<button
@@ -117,31 +134,50 @@
 		</ul>
 	</div>
 	<hr />
-	{#if blogEditorOpen}
-		<div class="modal-overlay">
-			<div
-				class="blog-editor-modal surface"
-				use:clickOutside
-				onoutclick={() => {
-					if (blogEditorOpen) {
-						blogEditorOpen = false;
-					}
-				}}
-			>
-				<button
-					class="button button-secondary"
-					onclick={() => {
-						if (blogEditorOpen) {
-							blogEditorOpen = false;
-						}
-					}}>Close</button
-				>
-				<BlogEditor />
-			</div>
+	<button class="button deleted-posts-button" class:open={displayDeletedPosts} onclick={toggleDeletedPosts}
+		>See Deleted Posts <span class="material-icons">arrow_drop_down</span></button
+	>
+	{#if displayDeletedPosts}
+		<div class="deleted-posts" transition:slide={{ duration: 200 }}>
+			{#if blogDummyData.filter((blog) => {
+				return blog.postState === "deleted";
+			}).length === 0}
+				<p>No deleted posts available.</p>
+			{:else}
+				<h3>Deleted Posts</h3>
+				{#each blogDummyData as blog}
+					{#if blog.postState === "deleted"}
+						<ul class="deleted-list">
+							<li class="blog-item">
+								<div>
+									<h4>{blog.title}</h4>
+									<p>{blog.subtitle}</p>
+									<p class="blog-date">{formatDate(blog.date)}</p>
+								</div>
+								<div class="blog-actions">
+									<button
+										class="button button-primary"
+										onclick={() => {
+											handleRestore({ ...blog, delta: blog.delta as Delta, postState: blog.postState as BlogPostState });
+										}}><span class="material-icons">restore</span>Restore</button
+									>
+								</div>
+							</li>
+						</ul>
+					{/if}
+				{/each}
+			{/if}
 		</div>
 	{/if}
+	<hr />
 </section>
-<Confirmation bind:open={confirmationOpen} {confirmFunc} message={confirmMessage} body={bodyMessage} />
+
+<!-- Reinitialises component to trigger onMount population -->
+{#if blogEditorOpen}
+	<BlogEditor bind:blogEditorOpen />
+{/if}
+
+<Confirmation bind:confirmationOpen {confirmFunc} message={confirmMessage} body={bodyMessage} />
 
 <style>
 	section {
@@ -214,27 +250,17 @@
 		margin: 1rem auto;
 	}
 
-	div.modal-overlay {
-		position: fixed;
-		top: 0;
-		left: 0;
-		width: 100%;
-		height: 100%;
-		background-color: rgba(0, 0, 0, 0.5);
-		display: flex;
-		justify-content: center;
-		align-items: center;
-		z-index: 1000;
-		backdrop-filter: blur(5px);
-		transition: opacity 0.3s ease-in-out;
-		opacity: 1;
-		pointer-events: all;
+	button.deleted-posts-button,
+	button.deleted-posts-button span {
+		transition: 0.2s;
 	}
 
-	div.blog-editor-modal {
-		width: clamp(300px, calc(100vw - calc(var(--padding-inline, 1rem)) * 2), 1200px);
-		max-height: calc(100vh - 4rem);
-		overflow-y: auto;
+	button.deleted-posts-button.open {
+		margin-bottom: 1rem;
+	}
+
+	button.deleted-posts-button.open span {
+		transform: rotate(180deg);
 	}
 
 	@media screen and (min-width: 768px) {
