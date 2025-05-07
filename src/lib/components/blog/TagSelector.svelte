@@ -11,6 +11,10 @@
 
 	function handleToggleTagSelectorOpen() {
 		tagSelectorOpen = !tagSelectorOpen;
+		if (tagInputOpen) {
+			tagInputOpen = false;
+			tagSelectorOpen = false;
+		}
 	}
 
 	function handleDeselectTag(tag: string) {
@@ -38,7 +42,14 @@
 	});
 </script>
 
-<div class="tag-selector-container" use:clickOutside onoutclick={() => (tagSelectorOpen = false)}>
+<div
+	class="tag-selector-container"
+	use:clickOutside
+	onoutclick={() => {
+		tagSelectorOpen = false;
+		tagInputOpen = false;
+	}}
+>
 	<button class="button button-primary" onclick={handleToggleTagSelectorOpen}>
 		<span class="material-icons">tag</span>
 		Select Tags
