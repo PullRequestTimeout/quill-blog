@@ -2,6 +2,7 @@
 	import { clickOutside } from "$lib/utils/clickOutside";
 	import { databaseHandlers } from "$lib/firebase/db";
 	import { onMount } from "svelte";
+	import { blogOutput } from "$lib/components/blog/blogOutput.svelte";
 	import { handleAlertMessage } from "$lib/stores/uiStore.svelte";
 	let { selectedTags = $bindable([]) }: { selectedTags?: string[] } = $props();
 	let tags: string[] = $state([]);
@@ -39,6 +40,9 @@
 		databaseHandlers.getAllTags().then((fetchedTags) => {
 			tags = fetchedTags;
 		});
+		if (blogOutput.tags) {
+			selectedTags = blogOutput.tags;
+		}
 	});
 </script>
 
