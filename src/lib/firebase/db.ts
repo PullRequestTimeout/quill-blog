@@ -11,8 +11,8 @@
 // -----------------------------------------------------
 
 // Firebase imports
-import { auth, db } from "$lib/firebase/firebase.js";
-import { doc, getDoc, setDoc, updateDoc, deleteDoc, collection, getDocs } from "firebase/firestore";
+import { db } from "$lib/firebase/firebase.js";
+import { doc, getDoc, setDoc, updateDoc, collection, getDocs } from "firebase/firestore";
 
 // UI import
 import { handleAlertMessage } from "$lib/stores/uiStore.svelte";
@@ -159,6 +159,52 @@ export const databaseHandlers = {
 		} catch (error) {
 			console.error("Error adding tag: ", error);
 			handleAlertMessage("An error occurred trying to add the tag.");
+		}
+	},
+
+	isSlugUsed: async (slug: string) => {
+		try {
+			const postRef = doc(db, "posts", slug);
+			const postSnapshot = await getDoc(postRef);
+			if (postSnapshot.exists()) {
+				return true; // Slug is already used
+			} else {
+				return false; // Slug is not used
+			}
+		} catch (error) {
+			console.error("Error checking slug: ", error);
+			handleAlertMessage("An error occurred trying to check the slug.");
+		}
+	},
+
+	isBlogSaved: async (slug: string, blog: BlogPost) => {
+		if (slug === "") {
+			return false; // Slug is not provided
+		}
+		try {
+			const postRef = doc(db, "posts", slug);
+			const postSnapshot = await getDoc(postRef);
+			if (!postSnapshot.exists()) {
+				return false; // Blog post is not saved
+			} else if (postSnapshot.exists()) {
+				// check the data in the database is different from the data in the blog object
+				const postData = postSnapshot.data();
+				const isSame =
+					postData.slug === blog.slug &&
+					postData.title === blog.title &&
+					postData.subtitle === blog.subtitle &&
+					postData.html === blog.html &&
+					postData.postState === blog.postState &&
+					postData.author === blog.author &&
+					postData.date === blog.date &&
+					JSON.stringify(postData.tags) === JSON.stringify(blog.tags) &&
+					JSON.stringify(postData.delta) === JSON.stringify(blog.delta);
+
+				return isSame; // Blog post is saved
+			}
+		} catch (error) {
+			console.error("Error checking if blog is saved: ", error);
+			handleAlertMessage("An error occurred trying to check if the blog is saved.");
 		}
 	}
 };
