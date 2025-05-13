@@ -2,9 +2,11 @@
 	// Import blog posts
 	import type { PageData } from "./$types";
 	const { data }: { data: PageData } = $props();
+	import type { BlogPost } from "$lib/components/blog/blogOutput.svelte";
 
 	// Import utils
 	import { formatDate } from "$lib/utils/formatDate";
+	const blogPostsArr = data.publishedBlogPosts.sort((a: BlogPost, b: BlogPost) => b.date.localeCompare(a.date));
 </script>
 
 <svelte:head>
@@ -14,15 +16,17 @@
 <main>
 	<section class="blog-header">
 		<h1>Blog</h1>
-		<p>Welcome to the blog section. Here you can find all the latest posts.</p>
+		<p>Welcome to the blog! Here you can find all our latest articles.</p>
 		<hr />
 	</section>
 	<section>
 		<h2>Latest Articles</h2>
 		<div class="blog-posts-container">
-			{#each data.publishedBlogPosts as post}
+			{#each blogPostsArr as post}
 				<div class="blog-card surface">
-					<!-- <img src={post.cardImage} alt={post.title} /> -->
+					{#if post.heroImage}
+						<img src={post.heroImage} alt={`${post.title} hero image`} />
+					{/if}
 					<div>
 						<p>{post.author} — <span>{formatDate(post.date)}</span></p>
 					</div>
