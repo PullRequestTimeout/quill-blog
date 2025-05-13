@@ -11,6 +11,8 @@ export interface BlogPost {
 	title: string;
 	subtitle: string;
 	slug: string;
+	tags?: string[];
+	heroImage?: string;
 	author: string;
 	date: string; // ISO date string
 	postState: BlogPostState;
@@ -23,6 +25,8 @@ export let blogOutput: BlogPost = $state({
 	title: "",
 	subtitle: "",
 	slug: "",
+	tags: [],
+	heroImage: "",
 	author: authorsRegistered[0],
 	date: new Date().toLocaleDateString("en-CA", {
 		year: "numeric",
