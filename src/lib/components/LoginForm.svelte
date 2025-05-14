@@ -127,10 +127,6 @@
 		margin-top: var(--spacing-s);
 	}
 
-	span.material-icons {
-		font-size: 1.5rem;
-	}
-
 	div.password-input span.material-icons {
 		transform: translateY(0.25rem);
 	}
