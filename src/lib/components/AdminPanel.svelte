@@ -6,22 +6,19 @@
 	import { blogOutput } from "$lib/components/blog/blogOutput.svelte";
 	import { Delta } from "quill/core";
 	import type { BlogPost, BlogPostState } from "$lib/components/blog/blogOutput.svelte";
+	import { refreshBlogPosts, blogPostsArr } from "$lib/utils/refreshBlogPosts.svelte";
+
+	onMount(async () => {
+		// Fetch blog posts when the component mounts
+		await refreshBlogPosts();
+	});
 
 	// Components & Utils
-	import { handleAlertMessage } from "$lib/stores/uiStore.svelte";
 	import Confirmation from "$lib/components/Confirmation.svelte";
 	import { formatDate } from "$lib/utils/formatDate";
 
 	import { databaseHandlers } from "$lib/firebase/db";
 	import { onMount } from "svelte";
-	import { refreshPageData } from "$lib/utils/refreshPageData";
-	let blogPostsArr: BlogPost[] = $state([]);
-
-	onMount(async () => {
-		// Fetch blog posts from the database and sort them by date
-		blogPostsArr = await databaseHandlers.getAllBlogPosts();
-		blogPostsArr.sort((a: BlogPost, b: BlogPost) => b.date.localeCompare(a.date));
-	});
 
 	// Edit blog post functionality
 	let blogEditorOpen = $state(false);
@@ -42,7 +39,7 @@
 		bodyMessage = blog.title;
 		confirmFunc = async () => {
 			await databaseHandlers.deleteBlogPost(blog);
-			refreshPageData();
+			await refreshBlogPosts();
 		};
 	}
 
@@ -59,7 +56,7 @@
 		bodyMessage = blog.title;
 		confirmFunc = async () => {
 			await databaseHandlers.restoreBlogPost(blog);
-			refreshPageData();
+			await refreshBlogPosts();
 		};
 	}
 
@@ -70,7 +67,7 @@
 		bodyMessage = blog.title;
 		confirmFunc = async () => {
 			await databaseHandlers.permanentDeleteBlogPost(blog);
-			refreshPageData();
+			await refreshBlogPosts();
 		};
 	}
 </script>
@@ -85,12 +82,12 @@
 		<h3>Create New Post</h3>
 		<button class="button button-primary" onclick={() => (blogEditorOpen = true)}><span class="material-icons">add</span>New Blog Post</button>
 	</div>
-	<hr />
-	<div class="draft-posts">
-		<h3>Unpublished Drafts</h3>
-		{#if blogPostsArr.length === 0}
-			<p>No draft posts available.</p>
-		{:else}
+	{#if blogPostsArr.filter((blog: any) => {
+		return blog.postState === "draft";
+	}).length > 0}
+		<hr />
+		<div class="draft-posts">
+			<h3>Unpublished Drafts</h3>
 			<ul class="draft-list">
 				{#each blogPostsArr as blog}
 					{#if blog.postState === "draft"}
@@ -117,43 +114,48 @@
 					{/if}
 				{/each}
 			</ul>
-		{/if}
-	</div>
-	<hr />
-	<div class="published-posts">
-		<h3>Published Posts</h3>
-		<ul class="published-list">
-			{#if blogPostsArr.length === 0}
-				<li>No published posts available.</li>
-			{:else}
-				{#each blogPostsArr as blog}
-					{#if blog.postState === "published"}
-						<li class="blog-item">
-							<div>
-								<h4>{blog.title}</h4>
-								<p>{blog.subtitle}</p>
-								<p class="blog-date">{formatDate(blog.date)}</p>
-							</div>
-							<div class="blog-actions">
-								<button
-									class="button button-primary"
-									onclick={() => {
-										handleEdit({ ...blog, delta: blog.delta as Delta, postState: blog.postState as BlogPostState });
-									}}><span class="material-icons">edit</span>Edit</button
-								>
-								<button
-									class="button button-secondary"
-									onclick={() => handleDelete({ ...blog, delta: blog.delta as Delta, postState: blog.postState as BlogPostState })}
-									><span class="material-icons">delete</span>Delete</button
-								>
-							</div>
-						</li>
-					{/if}
-				{/each}
-			{/if}
-		</ul>
-	</div>
-	<hr />
+		</div>
+	{/if}
+	{#if blogPostsArr.filter((blog: any) => {
+		return blog.postState === "published";
+	}).length > 0}
+		<hr />
+		<div class="published-posts">
+			<h3>Published Posts</h3>
+			<ul class="published-list">
+				{#if blogPostsArr.length === 0}
+					<li>No published posts available.</li>
+				{:else}
+					{#each blogPostsArr as blog}
+						{#if blog.postState === "published"}
+							<li class="blog-item">
+								<div>
+									<h4>{blog.title}</h4>
+									<p>{blog.subtitle}</p>
+									<p class="blog-date">{formatDate(blog.date)}</p>
+								</div>
+								<div class="blog-actions">
+									<button
+										class="button button-primary"
+										onclick={() => {
+											handleEdit({ ...blog, delta: blog.delta as Delta, postState: blog.postState as BlogPostState });
+										}}><span class="material-icons">edit</span>Edit</button
+									>
+									<button
+										class="button button-secondary"
+										onclick={() => handleDelete({ ...blog, delta: blog.delta as Delta, postState: blog.postState as BlogPostState })}
+										><span class="material-icons">delete</span>Delete</button
+									>
+								</div>
+							</li>
+						{/if}
+					{/each}
+				{/if}
+			</ul>
+		</div>
+		<hr />
+	{/if}
+
 	{#if blogPostsArr.filter((blog: any) => {
 		return blog.postState === "deleted";
 	}).length > 0}

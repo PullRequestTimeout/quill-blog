@@ -6,6 +6,7 @@
 	import "quill/dist/quill.snow.css";
 
 	import { databaseHandlers } from "$lib/firebase/db";
+	import { refreshBlogPosts } from "$lib/utils/refreshBlogPosts.svelte";
 
 	// Props
 	let { blogEditorOpen = $bindable(false) }: { blogEditorOpen: boolean } = $props();
@@ -33,7 +34,6 @@
 	// UI Components
 	import Confirmation from "$lib/components/Confirmation.svelte";
 	import TagSelector from "./TagSelector.svelte";
-	import { refreshPageData } from "$lib/utils/refreshPageData";
 
 	// Cloudinary Bucket
 	let cloudinaryBucket = import.meta.env.VITE_CLOUDINARY_BUCKET;
@@ -232,7 +232,7 @@
 				await databaseHandlers.saveDraftBlogPost(blogOutput);
 				handleClearEditor();
 				blogEditorOpen = false;
-				refreshPageData();
+				refreshBlogPosts();
 			},
 			blogOutput.title
 		);
@@ -265,7 +265,7 @@
 				await databaseHandlers.publishBlogPost(blogOutput);
 				handleClearEditor();
 				blogEditorOpen = false;
-				refreshPageData();
+				refreshBlogPosts();
 			},
 			blogOutput.title
 		);
