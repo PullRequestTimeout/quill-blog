@@ -3,7 +3,7 @@
 	import { uiStore } from "$lib/stores/uiStore.svelte";
 </script>
 
-{#if uiStore.alertMessage}
+{#if uiStore.alertMessage && !uiStore.blogEditorOpen}
 	<div class="surface" transition:fly={{ y: 20, duration: 200 }}>
 		<p>{uiStore.alertMessage}</p>
 	</div>
