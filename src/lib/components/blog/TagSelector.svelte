@@ -143,6 +143,10 @@
 	}
 
 	div.tag-selector-list button.button-primary {
+		height: unset;
+	}
+
+	div.tag-selector-list button.button-primary {
 		padding: var(--spacing-xs) var(--spacing-s);
 	}
 
