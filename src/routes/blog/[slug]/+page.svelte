@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { PageData } from "./$types";
 	import { formatDate } from "$lib/utils/formatDate";
-	import blogDummyData from "$lib/data/blogDummyData.json";
+	import type { BlogPost } from "$lib/components/blog/blogOutput.svelte";
 
 	export let data: PageData;
 
@@ -16,13 +16,6 @@
 		const wordCount = text.trim().split(/\s+/).length;
 		return Math.ceil(wordCount / wordsPerMinute);
 	}
-
-	function getAllPublishedPosts() {
-		// Only retrieve published posts
-		return blogDummyData.filter((post) => post.postState !== "draft");
-	}
-
-	let dev = false;
 </script>
 
 <svelte:head>
@@ -37,7 +30,7 @@
 		<p class="blog-date">{formatDate(data.blog.date)}</p>
 		<hr />
 	</section>
-	<section class="blog-body" class:columns={getAllPublishedPosts().length > 1}>
+	<section class="blog-body" class:columns={data.publishedBlogPosts.length > 0}>
 		<div class="blog-content">
 			<p>Estimated reading time — {readingTimeFromHTML(data.blog.html)}min</p>
 			{@html data.blog.html}
@@ -48,12 +41,10 @@
 			</div>
 		</div>
 		<div class="recent-blogs">
-			{#if getAllPublishedPosts().length > 1}
+			{#if data.publishedBlogPosts.length > 1}
 				<h2>Recent Articles</h2>
 				<div class="blog-posts-container">
-					{#each getAllPublishedPosts()
-						.filter((post) => post.slug !== data.blog.slug)
-						.slice(0, 3) as post}
+					{#each data.publishedBlogPosts.filter((post: BlogPost) => post.slug !== data.blog.slug).slice(0, 3) as post}
 						<div class="blog-card surface">
 							<!-- <img src={post.cardImage} alt={post.title} /> -->
 							<div>
