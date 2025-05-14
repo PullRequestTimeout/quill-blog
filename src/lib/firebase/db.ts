@@ -69,7 +69,7 @@ export const databaseHandlers = {
 			// Check if the post exists in the database
 			const postRef = doc(db, "posts", post.slug);
 			const postSnapshot = await getDoc(postRef);
-			const publishedPost = {
+			const publishedPost: BlogPost = {
 				...post,
 				postState: "published",
 				date: new Date().toLocaleDateString("en-CA", {
@@ -77,17 +77,17 @@ export const databaseHandlers = {
 					month: "2-digit",
 					day: "2-digit"
 				}),
+				html: post.html,
+				tags: post.tags,
 				delta: JSON.parse(JSON.stringify(post.delta))
 			};
 			// If it does, and the post is not already in draft state, update it to published state
 			if (!postSnapshot.exists()) {
 				await setDoc(postRef, publishedPost);
 				handleAlertMessage("Blog post created and published successfully.");
-			} else if (postSnapshot.data().postState === "draft" || postSnapshot.data().postState === "deleted") {
-				await updateDoc(postRef, publishedPost);
-				handleAlertMessage("Blog post published successfully.");
-			} else if (postSnapshot.data().postState === "published") {
-				handleAlertMessage("Blog post is already published.");
+			} else {
+				await setDoc(postRef, publishedPost, { merge: true });
+				handleAlertMessage("Blog post updated and published successfully.");
 			}
 		} catch (error) {
 			console.error("Error publishing blog post: ", error);
