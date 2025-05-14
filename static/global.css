@@ -178,6 +178,7 @@ h5,
 h6 {
 	font-family: var(--font-heading), sans-serif;
 	padding: 0;
+	text-transform: capitalize;
 	margin: 0 0 1rem 0;
 }
 
@@ -212,12 +213,17 @@ section {
 	transition: none;
 }
 
+span.material-icons {
+	font-size: 1.25rem;
+}
+
 /* Utilities ------------------------------------------- */
 
 .button {
 	border: none;
 	white-space: nowrap;
 	width: fit-content;
+	height: 40px;
 	padding: var(--spacing-xs) var(--spacing-s);
 	border-radius: 0.5rem;
 	font-size: var(--font-body-s);
@@ -227,6 +233,7 @@ section {
 	align-items: center;
 	justify-content: center;
 	gap: var(--spacing-xs);
+	cursor: pointer;
 }
 
 @media screen and (min-width: 768px) {
@@ -251,8 +258,8 @@ section {
 	border: 2px solid var(--color-black, #000);
 }
 
-.button-secondary {
-}
+/* .button-secondary {
+} */
 
 .button-link {
 	color: inherit;
