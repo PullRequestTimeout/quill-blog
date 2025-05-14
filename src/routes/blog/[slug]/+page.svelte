@@ -2,8 +2,7 @@
 	import type { PageData } from "./$types";
 	import { formatDate } from "$lib/utils/formatDate";
 	import type { BlogPost } from "$lib/components/blog/blogOutput.svelte";
-
-	export let data: PageData;
+	const { data }: { data: PageData } = $props();
 
 	function readingTimeFromHTML(html: string): number {
 		const wordsPerMinute = 200;
@@ -16,6 +15,11 @@
 		const wordCount = text.trim().split(/\s+/).length;
 		return Math.ceil(wordCount / wordsPerMinute);
 	}
+
+	let readingTime: number = $state(0);
+	$effect(() => {
+		readingTime = readingTimeFromHTML(data.blog.html);
+	});
 </script>
 
 <svelte:head>
@@ -32,7 +36,9 @@
 	</section>
 	<section class="blog-body" class:columns={data.publishedBlogPosts.length > 0}>
 		<div class="blog-content">
-			<p>Estimated reading time — {readingTimeFromHTML(data.blog.html)}min</p>
+			{#if !!readingTime}
+				<p>Estimated reading time — {readingTime}min</p>
+			{/if}
 			{@html data.blog.html}
 			<hr />
 			<div class="blog-footer">
