@@ -13,8 +13,15 @@
 	import { formatDate } from "$lib/utils/formatDate";
 
 	import { databaseHandlers } from "$lib/firebase/db";
-	// TODO: Link to database to fetch draft posts
-	import blogDummyData from "$lib/data/blogDummyData.json";
+	import { onMount } from "svelte";
+	import { refreshPageData } from "$lib/utils/refreshPageData";
+	let blogPostsArr: BlogPost[] = $state([]);
+
+	onMount(async () => {
+		// Fetch blog posts from the database and sort them by date
+		blogPostsArr = await databaseHandlers.getAllBlogPosts();
+		blogPostsArr.sort((a: BlogPost, b: BlogPost) => b.date.localeCompare(a.date));
+	});
 
 	// Edit blog post functionality
 	let blogEditorOpen = $state(false);
@@ -33,8 +40,9 @@
 		// Open the confirmation dialog
 		confirmationOpen = true;
 		bodyMessage = blog.title;
-		confirmFunc = () => {
-			handleAlertMessage(`Deleted blog post: ${blog.title}`, 5);
+		confirmFunc = async () => {
+			await databaseHandlers.deleteBlogPost(blog);
+			refreshPageData();
 		};
 	}
 
@@ -49,8 +57,20 @@
 		confirmationOpen = true;
 		confirmMessage = "Are you sure you want to restore this post to drafts?";
 		bodyMessage = blog.title;
-		confirmFunc = () => {
-			databaseHandlers.restoreBlogPost(blog);
+		confirmFunc = async () => {
+			await databaseHandlers.restoreBlogPost(blog);
+			refreshPageData();
+		};
+	}
+
+	function handlePermanentDelete(blog: BlogPost) {
+		// Open the confirmation dialog
+		confirmationOpen = true;
+		confirmMessage = "Are you sure you want to permanently delete this post? This action cannot be undone.";
+		bodyMessage = blog.title;
+		confirmFunc = async () => {
+			await databaseHandlers.permanentDeleteBlogPost(blog);
+			refreshPageData();
 		};
 	}
 </script>
@@ -68,11 +88,11 @@
 	<hr />
 	<div class="draft-posts">
 		<h3>Unpublished Drafts</h3>
-		{#if blogDummyData.length === 0}
+		{#if blogPostsArr.length === 0}
 			<p>No draft posts available.</p>
 		{:else}
 			<ul class="draft-list">
-				{#each blogDummyData as blog}
+				{#each blogPostsArr as blog}
 					{#if blog.postState === "draft"}
 						<li class="blog-item">
 							<div>
@@ -103,10 +123,10 @@
 	<div class="published-posts">
 		<h3>Published Posts</h3>
 		<ul class="published-list">
-			{#if blogDummyData.length === 0}
+			{#if blogPostsArr.length === 0}
 				<li>No published posts available.</li>
 			{:else}
-				{#each blogDummyData as blog}
+				{#each blogPostsArr as blog}
 					{#if blog.postState === "published"}
 						<li class="blog-item">
 							<div>
@@ -134,18 +154,16 @@
 		</ul>
 	</div>
 	<hr />
-	<button class="button deleted-posts-button" class:open={displayDeletedPosts} onclick={toggleDeletedPosts}
-		>See Deleted Posts <span class="material-icons">arrow_drop_down</span></button
-	>
-	{#if displayDeletedPosts}
-		<div class="deleted-posts" transition:slide={{ duration: 200 }}>
-			{#if blogDummyData.filter((blog) => {
-				return blog.postState === "deleted";
-			}).length === 0}
-				<p>No deleted posts available.</p>
-			{:else}
+	{#if blogPostsArr.filter((blog: any) => {
+		return blog.postState === "deleted";
+	}).length > 0}
+		<button class="button deleted-posts-button" class:open={displayDeletedPosts} onclick={toggleDeletedPosts}
+			>See Deleted Posts <span class="material-icons">arrow_drop_down</span></button
+		>
+		{#if displayDeletedPosts}
+			<div class="deleted-posts" transition:slide={{ duration: 200 }}>
 				<h3>Deleted Posts</h3>
-				{#each blogDummyData as blog}
+				{#each blogPostsArr as blog}
 					{#if blog.postState === "deleted"}
 						<ul class="deleted-list">
 							<li class="blog-item">
@@ -161,15 +179,20 @@
 											handleRestore({ ...blog, delta: blog.delta as Delta, postState: blog.postState as BlogPostState });
 										}}><span class="material-icons">restore</span>Restore</button
 									>
+									<button
+										class="button button-secondary"
+										onclick={() => handlePermanentDelete({ ...blog, delta: blog.delta as Delta, postState: blog.postState as BlogPostState })}
+										><span class="material-icons">delete</span>Permanently Delete</button
+									>
 								</div>
 							</li>
 						</ul>
 					{/if}
 				{/each}
-			{/if}
-		</div>
+			</div>
+		{/if}
+		<hr />
 	{/if}
-	<hr />
 </section>
 
 <!-- Reinitialises component to trigger onMount population -->

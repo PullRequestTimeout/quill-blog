@@ -5,8 +5,6 @@
 	import { Delta } from "quill/core";
 	import "quill/dist/quill.snow.css";
 
-	import blogDummyData from "$lib/data/blogDummyData.json";
-
 	import { databaseHandlers } from "$lib/firebase/db";
 
 	// Props
@@ -28,22 +26,27 @@
 	// Utils Imports
 	import { blogOutput, updateSlug, authorsRegistered } from "$lib/components/blog/blogOutput.svelte";
 	import type { BlogPostState, BlogPost } from "$lib/components/blog/blogOutput.svelte";
-	import { clickOutside } from "$lib/utils/clickOutside";
+	import { handleAlertMessage, uiStore } from "$lib/stores/uiStore.svelte";
 
 	// UI Components
 	import Confirmation from "$lib/components/Confirmation.svelte";
+	import TagSelector from "./TagSelector.svelte";
+	import { refreshPageData } from "$lib/utils/refreshPageData";
 
 	// Cloudinary Bucket
 	let cloudinaryBucket = import.meta.env.VITE_CLOUDINARY_BUCKET;
 
 	// State vars
-	let cardImage: FileList | null = $state(null);
-	let cardImageUpload: any = $state(null);
 	let heroImage: FileList | null = $state(null);
-	let heroImageUpload: any = $state(null);
+	let heroImageUpload: string | null = $state(null);
+
 	let wordCount = $state(0);
 	let charCount = $state(0);
-	let tags: string[] = $state([]);
+	let selectedTags: string[] = $state([]);
+
+	$effect(() => {
+		blogOutput.tags = selectedTags;
+	});
 
 	// Instantiate Quill editor on mount
 	onMount(() => {
@@ -95,13 +98,13 @@
 
 			// Validate type
 			if (!ALLOWED_TYPES.includes(file.type)) {
-				handleBlogEditorToastMessage("Only JPEG, PNG, and WEBP files are allowed.");
+				handleAlertMessage("Only JPEG, PNG, and WEBP files are allowed.");
 				return;
 			}
 
 			// Validate size
 			if (file.size > MAX_IMAGE_SIZE) {
-				handleBlogEditorToastMessage("Image is too large. Max file size is 2MB.");
+				handleAlertMessage("Image is too large. Max file size is 2MB.");
 				return;
 			}
 
@@ -124,23 +127,22 @@
 					this.quill.setSelection(range.index + 1);
 				} else {
 					console.error("Cloudinary upload failed:", data);
-					handleBlogEditorToastMessage("Image upload failed. Please try again.");
+					handleAlertMessage("Image upload failed. Please try again.");
 				}
 			} catch (err: any) {
 				console.error("Cloudinary upload error:", err);
-				handleBlogEditorToastMessage("Image upload error. Please try again.");
+				handleAlertMessage("Image upload error. Please try again.");
 			}
 		};
 	}
 
-	function handleClose() {
+	async function handleClose() {
 		// Check if input fields are empty, if they aren't, check if the current blog output is different from any of the blog posts in the database
 		// If it is, show confirmation dialog to discard changes
-		if (
-			(blogOutput.title || blogOutput.subtitle || blogOutput.slug || blogOutput.html) &&
-			!checkIfSaved(blogDummyData, $state.snapshot(blogOutput))
-		) {
-			handleConfirm("Are you sure you want to quit without saving?", () => {
+		const saved = await databaseHandlers.isBlogSaved(blogOutput.slug, $state.snapshot(blogOutput) as BlogPost);
+
+		if ((blogOutput.title || blogOutput.subtitle || blogOutput.slug || blogOutput.html) && saved === false) {
+			handleConfirm("Are you sure you want to quit without saving? Changes have not been saved.", () => {
 				handleClearEditor();
 				blogEditorOpen = false;
 			});
@@ -150,11 +152,30 @@
 		}
 	}
 
+	// Add event listener to the esc key, prevent default action, and use to run the handleClose function
+	function handleKeydown(event: KeyboardEvent) {
+		if (event.key === "Escape") {
+			event.preventDefault();
+			handleClose();
+		}
+	}
+
+	// This ensures that the modal is closed using the handleClose, so the confirmation dialog and prompt to save is shown
+	$effect(() => {
+		if (blogEditorOpen) {
+			document.addEventListener("keydown", handleKeydown);
+		} else {
+			document.removeEventListener("keydown", handleKeydown);
+		}
+	});
+
 	function handleClearEditor() {
 		Object.assign(blogOutput, {
 			title: "",
 			subtitle: "",
 			slug: "",
+			heroImage: "",
+			tags: [],
 			author: authorsRegistered[0],
 			date: (() =>
 				new Date().toLocaleDateString("en-CA", {
@@ -182,92 +203,70 @@
 		};
 	}
 
-	function checkIfSaved(currentSaved: any, blogOutput: any) {
-		return currentSaved.some((blog: any) => {
-			return (
-				blog.slug === blogOutput.slug &&
-				blog.title === blogOutput.title &&
-				blog.subtitle === blogOutput.subtitle &&
-				blog.html === blogOutput.html &&
-				blog.postState === blogOutput.postState &&
-				blog.author === blogOutput.author &&
-				blog.date === blogOutput.date &&
-				JSON.stringify(blog.tags) === JSON.stringify(blogOutput.tags) &&
-				JSON.stringify(blog.delta) === JSON.stringify(blogOutput.delta)
-			);
-		});
-	}
-
-	function checkIfTitleUsed(title: string) {
-		return blogDummyData.some((blog: any) => blog.title === title);
-	}
-
-	function handleSaveDraft() {
+	async function handleSaveDraft() {
 		// Ensures essential fields are filled
 		if (!blogOutput.title || !blogOutput.subtitle || !blogOutput.html) {
-			handleBlogEditorToastMessage("Please fill in the title, subtitle, and content before saving as draft.");
+			handleAlertMessage("Please fill in the title, subtitle, and content before saving as draft.");
 			return;
 		}
 
 		// Check if the blog post is already saved in the database in it's current state
-		if (checkIfSaved(blogDummyData, $state.snapshot(blogOutput))) {
-			handleBlogEditorToastMessage("This blog post has already been saved.");
-			return;
+		if (await databaseHandlers.isBlogSaved(blogOutput.slug, $state.snapshot(blogOutput) as BlogPost)) {
+			if (blogOutput.postState === "draft") {
+				handleAlertMessage("This blog post is already saved as a draft.");
+				return;
+			}
 		}
 
-		// If required fields are filled and the blog post is not already saved, show confirmation dialog
-		if (blogOutput.title && blogOutput.subtitle && blogOutput.slug && blogOutput.html && !checkIfSaved(blogDummyData, $state.snapshot(blogOutput))) {
-			handleConfirm("Are you sure you want to save this post as a draft?", () => {
+		handleConfirm(
+			"Are you sure you want to save this post as a draft?",
+			async () => {
 				blogOutput.postState = "draft";
 				blogOutput.date = new Date().toLocaleDateString("en-CA", {
 					year: "numeric",
 					month: "2-digit",
 					day: "2-digit"
 				});
-				databaseHandlers.createBlogPost(blogOutput).then(() => {
-					handleClearEditor();
-					blogEditorOpen = false;
-				});
-			});
-		}
+				await databaseHandlers.saveDraftBlogPost(blogOutput);
+				handleClearEditor();
+				blogEditorOpen = false;
+				refreshPageData();
+			},
+			blogOutput.title
+		);
 	}
 
 	function handlePreview() {
-		handleBlogEditorToastMessage("Preview feature is not implemented yet.");
+		handleAlertMessage("Preview feature is not implemented yet.");
 	}
 
 	async function handlePublish() {
 		if (!blogOutput.title || !blogOutput.subtitle || !blogOutput.html) {
-			handleBlogEditorToastMessage("Please fill in the title, subtitle, and content before publishing.");
+			handleAlertMessage("Please fill in the title, subtitle, and content before publishing.");
 			return;
 		}
 
-		if (blogOutput.postState === "published") {
-			handleBlogEditorToastMessage("This blog post is already published.");
+		if (blogOutput.postState === "published" && (await databaseHandlers.isBlogSaved(blogOutput.slug, $state.snapshot(blogOutput) as BlogPost))) {
+			handleAlertMessage("This blog post is already published in its current state.");
 			return;
 		}
 
-		// if (blogOutput.title && blogOutput.subtitle && blogOutput.slug && blogOutput.html && !checkIfSaved(blogDummyData, $state.snapshot(blogOutput))) {
-		handleConfirm("Are you sure you want to publish this post?", async () => {
-			blogOutput.postState = "published";
-			blogOutput.date = new Date().toLocaleDateString("en-CA", {
-				year: "numeric",
-				month: "2-digit",
-				day: "2-digit"
-			});
-			await databaseHandlers.createBlogPost(blogOutput);
-			handleClearEditor();
-			blogEditorOpen = false;
-		});
-	}
-	// }
-
-	let blogEditorToastMessage: string = $state("");
-	function handleBlogEditorToastMessage(message: string) {
-		blogEditorToastMessage = message;
-		setTimeout(() => {
-			blogEditorToastMessage = "";
-		}, 3000);
+		handleConfirm(
+			"Are you sure you want to publish this post?",
+			async () => {
+				blogOutput.postState = "published";
+				blogOutput.date = new Date().toLocaleDateString("en-CA", {
+					year: "numeric",
+					month: "2-digit",
+					day: "2-digit"
+				});
+				await databaseHandlers.publishBlogPost(blogOutput);
+				handleClearEditor();
+				blogEditorOpen = false;
+				refreshPageData();
+			},
+			blogOutput.title
+		);
 	}
 </script>
 
@@ -285,6 +284,7 @@
 				bind:value={blogOutput.title}
 				placeholder="Blog post title here..."
 				required
+				disabled={blogOutput.postState === "published"}
 			/>
 			<span class="blog-slug">Slug: {blogOutput.slug}</span>
 		</label>
@@ -292,11 +292,17 @@
 			Subtitle:
 			<input class="text-input" name="subtitle" type="text" bind:value={blogOutput.subtitle} placeholder="Blog post subtitle here..." />
 		</label>
-		<label class="blog-input-labels button button-primary">
-			<span class="material-icons">upload</span>
-			Upload Hero Image
-			<input type="file" bind:value={cardImageUpload} bind:files={cardImage} accept="image/jpeg" />
-		</label>
+		<div class="hero-image-upload">
+			<label class="blog-input-labels button button-primary">
+				<span class="material-icons">upload</span>
+				Upload Hero Image
+				<input type="file" bind:value={heroImageUpload} bind:files={heroImage} accept="image/jpeg" />
+			</label>
+			{#if heroImageUpload}
+				<div class="hero-image-upload-value">{heroImageUpload.replace(/^C:\\fakepath\\/, "")}</div>
+			{/if}
+		</div>
+		<TagSelector bind:selectedTags />
 	</div>
 	<div class="quill-container">
 		<div id="editor"></div>
@@ -308,8 +314,8 @@
 		<button class="button" onclick={handleClose}><span class="material-icons">delete</span>Discard</button>
 		<button class="button button-primary" onclick={handlePublish}><span class="material-icons">publish</span>Publish</button>
 	</div>
-	{#if blogEditorToastMessage}
-		<div class="surface toast-message" transition:fly={{ duration: 200, y: -8 }}>{blogEditorToastMessage}</div>
+	{#if uiStore.alertMessage}
+		<div class="surface toast-message" transition:fly={{ duration: 200, y: -8 }}>{uiStore.alertMessage}</div>
 	{/if}
 	<Confirmation bind:confirmationOpen {confirmFunc} message={confirmMessage} body={bodyMessage} />
 </dialog>
@@ -322,10 +328,10 @@
 	}
 
 	/* Just an idea, it might break things though */
-	/* :global(body:has(dialog.blog-editor[open])) {
+	:global(body:has(dialog.blog-editor[open])) {
 		overflow: hidden;
 		max-height: 100vh;
-	} */
+	}
 
 	:global(.ql-toolbar.ql-snow) {
 		border: 1px solid var(--color-black, #000);
@@ -344,11 +350,11 @@
 		padding: var(--spacing-m);
 	}
 
-	dialog.blog-editor div.toast-message {
+	div.toast-message {
 		position: fixed;
 		width: fit-content;
 		height: fit-content;
-		top: 3rem;
+		top: 4rem;
 		left: 50%;
 		transform: translateX(-50%);
 		z-index: 1000;
@@ -357,7 +363,6 @@
 
 	dialog.blog-editor::backdrop {
 		background-color: rgba(0, 0, 0, 0.5);
-		cursor: pointer;
 	}
 
 	dialog.blog-editor::-webkit-scrollbar {
@@ -407,9 +412,11 @@
 	input[type="file"] {
 		display: none;
 	}
-
-	/* label.upload-button {
-	} */
+	div.hero-image-upload {
+		display: flex;
+		align-items: center;
+		gap: var(--spacing-s);
+	}
 
 	div.blog-inputs label {
 		font-weight: 700;

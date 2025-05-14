@@ -1,18 +1,6 @@
-// funtions needed for blog operations ----------------
-
-// store new blog post
-// get all blog posts
-// get a single blog post
-// update a blog post
-// delete a blog post
-// Add new tag
-// get all tags
-
-// -----------------------------------------------------
-
 // Firebase imports
 import { db } from "$lib/firebase/firebase.js";
-import { doc, getDoc, setDoc, updateDoc, collection, getDocs } from "firebase/firestore";
+import { doc, getDoc, setDoc, updateDoc, collection, getDocs, deleteDoc } from "firebase/firestore";
 
 // UI import
 import { handleAlertMessage } from "$lib/stores/uiStore.svelte";
@@ -36,30 +24,74 @@ export const databaseHandlers = {
 	},
 
 	// create new blog post
-	createBlogPost: async (post: BlogPost) => {
+	saveDraftBlogPost: async (post: BlogPost) => {
 		try {
 			if (!post.slug) {
 				throw new Error("Post must have a slug.");
 			}
 
-			const newPostRef = doc(db, "posts", post.slug);
+			// Check if the post exists in the database
+			const postRef = doc(db, "posts", post.slug);
+			const postSnapshot = await getDoc(postRef);
+
 			// Serialize the delta field if it exists
-			const serializedPost = {
+			const draftPost = {
 				...post,
+				postState: "draft",
+				date: new Date().toLocaleDateString("en-CA", {
+					year: "numeric",
+					month: "2-digit",
+					day: "2-digit"
+				}),
 				delta: JSON.parse(JSON.stringify(post.delta))
 			};
+
 			// Check if the post already exists in the database
-			const postSnapshot = await getDoc(newPostRef);
 			if (postSnapshot.exists()) {
-				handleAlertMessage("Blog post with this slug already exists.");
-				return;
+				await updateDoc(postRef, draftPost);
+				handleAlertMessage("Changes saved to draft.");
 			} else if (!postSnapshot.exists()) {
-				await setDoc(newPostRef, serializedPost);
-				handleAlertMessage("Blog post created successfully.");
+				await setDoc(postRef, draftPost);
+				handleAlertMessage("Blog post saved as a draft.");
 			}
 		} catch (error) {
 			console.error("Error creating blog post: ", error);
-			handleAlertMessage("An error occurred trying to create the blog post.");
+			handleAlertMessage("An error occurred trying to save the blog post.");
+		}
+	},
+
+	publishBlogPost: async (post: BlogPost) => {
+		try {
+			if (!post.slug) {
+				throw new Error("Post must have a slug.");
+			}
+
+			// Check if the post exists in the database
+			const postRef = doc(db, "posts", post.slug);
+			const postSnapshot = await getDoc(postRef);
+			const publishedPost = {
+				...post,
+				postState: "published",
+				date: new Date().toLocaleDateString("en-CA", {
+					year: "numeric",
+					month: "2-digit",
+					day: "2-digit"
+				}),
+				delta: JSON.parse(JSON.stringify(post.delta))
+			};
+			// If it does, and the post is not already in draft state, update it to published state
+			if (!postSnapshot.exists()) {
+				await setDoc(postRef, publishedPost);
+				handleAlertMessage("Blog post created and published successfully.");
+			} else if (postSnapshot.data().postState === "draft" || postSnapshot.data().postState === "deleted") {
+				await updateDoc(postRef, publishedPost);
+				handleAlertMessage("Blog post published successfully.");
+			} else if (postSnapshot.data().postState === "published") {
+				handleAlertMessage("Blog post is already published.");
+			}
+		} catch (error) {
+			console.error("Error publishing blog post: ", error);
+			handleAlertMessage("An error occurred trying to publish the blog post.");
 		}
 	},
 
@@ -83,7 +115,7 @@ export const databaseHandlers = {
 			} else {
 				const updatedPost = { ...post, postState: "draft" };
 				await updateDoc(postRef, updatedPost);
-				handleAlertMessage("Blog post restored successfully.");
+				handleAlertMessage(`Restored blog post to drafts: ${post.title}`, 5);
 			}
 		} catch (error) {
 			console.error("Error restoring blog post: ", error);
@@ -107,11 +139,34 @@ export const databaseHandlers = {
 			} else if (postSnapshot.exists() && (post.postState === "draft" || post.postState === "published")) {
 				const updatedPost = { ...post, postState: "deleted" };
 				await updateDoc(postRef, updatedPost);
-				handleAlertMessage("Blog post deleted.");
+				handleAlertMessage(`Deleted blog post: ${post.title}`, 5);
 			}
 		} catch (error) {
 			console.error("Error deleting blog post: ", error);
 			handleAlertMessage("An error occurred trying to delete the blog post.");
+		}
+	},
+
+	permanentDeleteBlogPost: async (post: BlogPost) => {
+		try {
+			if (!post.slug) {
+				throw new Error("Post must have a slug.");
+			}
+			// Check if the post exists in the database
+			const postRef = doc(db, "posts", post.slug);
+			const postSnapshot = await getDoc(postRef);
+
+			if (!postSnapshot.exists()) {
+				handleAlertMessage("Blog post not found.");
+			} else if (postSnapshot.exists() && (post.postState === "draft" || post.postState === "published")) {
+				handleAlertMessage("Blog post is not in deleted state.");
+			} else if (postSnapshot.exists() && post.postState === "deleted") {
+				await deleteDoc(postRef);
+				handleAlertMessage(`Permanently deleted blog post: ${post.title}`, 5);
+			}
+		} catch (error) {
+			console.error("Error permanently deleting blog post: ", error);
+			handleAlertMessage("An error occurred trying to permanently delete the blog post.");
 		}
 	},
 
