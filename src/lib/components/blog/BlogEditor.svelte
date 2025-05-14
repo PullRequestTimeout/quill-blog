@@ -14,8 +14,10 @@
 		if (!dialog) return;
 		if (!!blogEditorOpen) {
 			dialog.showModal();
+			uiStore.blogEditorOpen = true;
 		} else {
 			dialog.close();
+			uiStore.blogEditorOpen = false;
 		}
 	});
 
