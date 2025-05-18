@@ -12,7 +12,6 @@
 	let { blogEditorOpen = $bindable(false) }: { blogEditorOpen: boolean } = $props();
 	let dialog: HTMLDialogElement;
 	$effect(() => {
-		if (!dialog) return;
 		if (!!blogEditorOpen) {
 			dialog.showModal();
 			uiStore.blogEditorOpen = true;
@@ -136,6 +135,64 @@
 				handleAlertMessage("Image upload error. Please try again.");
 			}
 		};
+	}
+
+	// Uploads a file from an <input type="file"> to Cloudinary and returns the URL
+	async function handleHeroImageUpload(fileInput: HTMLInputElement): Promise<string | null> {
+		const MAX_IMAGE_SIZE = 2 * 1024 * 1024; // 2MB
+		const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp"];
+		const UPLOAD_PRESET = "unsigned_blog_upload";
+		const CLOUDINARY_BUCKET = cloudinaryBucket; // or replace with actual string if not in scope
+
+		const file = fileInput.files?.[0];
+		if (!file) return null;
+
+		// Validate type
+		if (!ALLOWED_TYPES.includes(file.type)) {
+			handleAlertMessage("Only JPEG, PNG, and WEBP files are allowed.");
+			return null;
+		}
+
+		// Validate size
+		if (file.size > MAX_IMAGE_SIZE) {
+			handleAlertMessage("Image is too large. Max file size is 2MB.");
+			return null;
+		}
+
+		const formData = new FormData();
+		formData.append("file", file);
+		formData.append("upload_preset", UPLOAD_PRESET);
+
+		try {
+			const response = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_BUCKET}/image/upload`, {
+				method: "POST",
+				body: formData
+			});
+
+			const data = await response.json();
+
+			if (response.ok && data.secure_url) {
+				return data.secure_url;
+			} else {
+				console.error("Cloudinary upload failed:", data);
+				handleAlertMessage("Image upload failed. Please try again.");
+				return null;
+			}
+		} catch (err: any) {
+			console.error("Cloudinary upload error:", err);
+			handleAlertMessage("Image upload error. Please try again.");
+			return null;
+		}
+	}
+
+	// Wrapper for input change event
+	async function handleHeroImageInputChange(event: Event) {
+		const input = event.target as HTMLInputElement;
+		const url = await handleHeroImageUpload(input);
+		if (url) {
+			heroImageUpload = url;
+			blogOutput.heroImage = url;
+		}
 	}
 
 	async function handleClose() {
@@ -298,10 +355,15 @@
 			<label class="blog-input-labels button button-primary">
 				<span class="material-icons">upload</span>
 				Upload Hero Image
-				<input type="file" bind:value={heroImageUpload} bind:files={heroImage} accept="image/jpeg" />
+				<input type="file" bind:files={heroImage} onchange={(e) => handleHeroImageInputChange(e)} accept="image/*" />
 			</label>
-			{#if heroImageUpload}
-				<div class="hero-image-upload-value">{heroImageUpload.replace(/^C:\\fakepath\\/, "")}</div>
+			{#if blogOutput.heroImage}
+				<div class="hero-image-upload-preview">
+					<img src={blogOutput.heroImage} alt={blogOutput.heroImage} />
+					<button class="button" onclick={() => (blogOutput.heroImage = "")}>
+						<span class="material-icons">delete</span>
+					</button>
+				</div>
 			{/if}
 		</div>
 		<TagSelector bind:selectedTags />
@@ -414,10 +476,42 @@
 	input[type="file"] {
 		display: none;
 	}
+
 	div.hero-image-upload {
 		display: flex;
-		align-items: center;
+		flex-direction: column;
 		gap: var(--spacing-s);
+	}
+
+	div.hero-image-upload-preview {
+		position: relative;
+		max-width: 15rem;
+	}
+
+	div.hero-image-upload-preview button {
+		position: absolute;
+		top: 0.5rem;
+		right: 0.5rem;
+		background-color: #00000050;
+		padding: 0.25rem;
+		border-radius: 2rem;
+		color: var(--color-white, #fff);
+		transition: background-color 0.2s;
+	}
+
+	div.hero-image-upload-preview button span {
+		margin: 0;
+		width: 2rem;
+	}
+
+	div.hero-image-upload-preview img {
+		border-radius: 0.5rem;
+	}
+
+	@media (hover: hover) {
+		div.hero-image-upload-preview button:hover {
+			background-color: #00000080;
+		}
 	}
 
 	div.blog-inputs label {
@@ -439,7 +533,7 @@
 	div.blog-actions {
 		display: grid;
 		grid-template-columns: repeat(2, 1fr);
-		gap: var(--spacing-m);
+		gap: var(--spacing-s);
 	}
 
 	div.blog-actions button {
@@ -469,16 +563,22 @@
 	}
 
 	@media screen and (min-width: 768px) {
-		dialog.blog-editor {
-			padding: var(--spacing-m) var(--spacing-l);
-		}
-
 		button.close {
 			right: 2rem;
 		}
 
 		div.blog-inputs {
 			grid-template-columns: 1fr 1fr;
+		}
+
+		div.hero-image-upload {
+			flex-direction: row;
+		}
+	}
+
+	@media screen and (min-width: 1024px) {
+		dialog.blog-editor {
+			padding: var(--spacing-m) var(--spacing-l);
 		}
 	}
 

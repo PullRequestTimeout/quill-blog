@@ -117,15 +117,19 @@
 		position: relative;
 		display: inline-block;
 		width: fit-content;
+		height: fit-content;
 		display: flex;
 		gap: var(--spacing-s);
-		align-items: center;
+	}
+
+	div.tag-selector-container {
+		flex-direction: column;
 	}
 
 	div.tag-selector-list,
 	div.tag-input-container {
 		position: absolute;
-		top: calc(100% + var(--spacing-s));
+		top: calc(2.5rem + var(--spacing-s));
 		left: 0;
 		z-index: 1;
 		display: grid;
@@ -198,5 +202,11 @@
 	span.tag button span {
 		font-size: 0.75rem;
 		transform: translate(0.005rem, 0);
+	}
+
+	@media screen and (min-width: 768px) {
+		div.tag-selector-container {
+			flex-direction: row;
+		}
 	}
 </style>

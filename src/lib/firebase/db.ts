@@ -251,6 +251,7 @@ export const databaseHandlers = {
 					postData.html === blog.html &&
 					postData.postState === blog.postState &&
 					postData.author === blog.author &&
+					postData.heroImage === blog.heroImage &&
 					postData.date === blog.date &&
 					JSON.stringify(postData.tags) === JSON.stringify(blog.tags) &&
 					JSON.stringify(postData.delta) === JSON.stringify(blog.delta);
