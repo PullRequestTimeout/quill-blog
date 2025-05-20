@@ -8,19 +8,6 @@
 	import { databaseHandlers } from "$lib/firebase/db";
 	import { refreshBlogPosts } from "$lib/utils/refreshBlogPosts.svelte";
 
-	// Props
-	let { blogEditorOpen = $bindable(false) }: { blogEditorOpen: boolean } = $props();
-	let dialog: HTMLDialogElement;
-	$effect(() => {
-		if (!!blogEditorOpen) {
-			dialog.showModal();
-			uiStore.blogEditorOpen = true;
-		} else {
-			dialog.close();
-			uiStore.blogEditorOpen = false;
-		}
-	});
-
 	// Svelte Imports
 	import { onMount } from "svelte";
 	import { fade, fly } from "svelte/transition";
@@ -39,12 +26,22 @@
 
 	// State vars
 	let heroImage: FileList | null = $state(null);
-	let heroImageUpload: string | null = $state(null);
-
 	let wordCount = $state(0);
 	let charCount = $state(0);
 	let selectedTags: string[] = $state([]);
 
+	// Props
+	let { blogEditorOpen = $bindable(false) }: { blogEditorOpen: boolean } = $props();
+	let dialog: HTMLDialogElement;
+	$effect(() => {
+		if (blogEditorOpen) {
+			dialog.showModal();
+		} else {
+			dialog.close();
+		}
+	});
+
+	// Update the blogOutput object with the selected tags
 	$effect(() => {
 		blogOutput.tags = selectedTags;
 	});
@@ -190,7 +187,6 @@
 		const input = event.target as HTMLInputElement;
 		const url = await handleHeroImageUpload(input);
 		if (url) {
-			heroImageUpload = url;
 			blogOutput.heroImage = url;
 		}
 	}
@@ -242,7 +238,7 @@
 					month: "2-digit",
 					day: "2-digit"
 				}))(),
-			postState: "draft" as BlogPostState,
+			postState: "unsaved" as BlogPostState,
 			html: "",
 			delta: new Delta()
 		});
@@ -525,7 +521,7 @@
 	}
 
 	p.quill-stats,
-	.blog-slug {
+	span.blog-slug {
 		font-size: 0.75rem;
 		opacity: 0.8;
 	}
