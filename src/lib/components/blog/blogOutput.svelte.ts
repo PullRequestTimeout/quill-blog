@@ -4,7 +4,7 @@ import { Delta } from "quill/core";
 export const authorsRegistered = ["Jacob Druery", "Michelle Coish"];
 
 // Types ------------------------------------------------
-export type BlogPostState = "published" | "draft" | "deleted";
+export type BlogPostState = "unsaved" | "published" | "draft" | "deleted";
 
 export interface BlogPost {
 	version?: number;
@@ -33,7 +33,7 @@ export let blogOutput: BlogPost = $state({
 		month: "2-digit",
 		day: "2-digit"
 	}),
-	postState: "draft" as BlogPostState,
+	postState: "unsaved" as BlogPostState,
 	html: "",
 	delta: new Delta()
 });
