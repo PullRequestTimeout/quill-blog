@@ -7,6 +7,7 @@
 	import { Delta } from "quill/core";
 	import type { BlogPost, BlogPostState } from "$lib/components/blog/blogOutput.svelte";
 	import { refreshBlogPosts, blogPostsArr } from "$lib/utils/refreshBlogPosts.svelte";
+	import { uiStore } from "$lib/stores/uiStore.svelte";
 
 	onMount(async () => {
 		// Fetch blog posts when the component mounts
@@ -22,6 +23,15 @@
 
 	// Edit blog post functionality
 	let blogEditorOpen = $state(false);
+	$effect(() => {
+		// Controls toast component visibility. If the blog editor is open, the internal toast will be used instead of the global one.
+		if (blogEditorOpen) {
+			uiStore.blogEditorOpen = true;
+		} else {
+			uiStore.blogEditorOpen = false;
+		}
+	});
+
 	function handleEdit(blog: BlogPost) {
 		// Populate the editor with blog data and open the editor
 		Object.assign(blogOutput, blog);
