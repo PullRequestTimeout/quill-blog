@@ -8,6 +8,7 @@ export type BlogPostState = "unsaved" | "published" | "draft" | "deleted";
 
 export interface BlogPost {
 	version?: number;
+	id: string;
 	title: string;
 	subtitle: string;
 	slug: string;
@@ -22,6 +23,7 @@ export interface BlogPost {
 
 export let blogOutput: BlogPost = $state({
 	version: 1,
+	id: "",
 	title: "",
 	subtitle: "",
 	slug: "",
@@ -57,7 +59,7 @@ export function updateSlug() {
 	// Only update the slug if the post is in draft state
 	// This allows for the slug to be set when the post is first created
 	// and not changed when the post is published
-	if (blogOutput.postState === "draft") {
+	if (blogOutput.postState === "draft" || blogOutput.postState === "unsaved") {
 		// Update the slug when the title changes
 		if (blogOutput.title) {
 			blogOutput.slug = titleToSlug(blogOutput.title);

@@ -1,6 +1,6 @@
 // Firebase imports
 import { db } from "$lib/firebase/firebase.js";
-import { doc, getDoc, setDoc, updateDoc, collection, getDocs, deleteDoc } from "firebase/firestore";
+import { doc, getDoc, setDoc, updateDoc, collection, getDocs, deleteDoc, query, where } from "firebase/firestore";
 
 // UI import
 import { handleAlertMessage } from "$lib/stores/uiStore.svelte";
@@ -23,20 +23,19 @@ export const databaseHandlers = {
 		}
 	},
 
-	// create new blog post
+	// create new draft blog post
 	saveDraftBlogPost: async (post: BlogPost) => {
 		try {
-			if (!post.slug) {
-				throw new Error("Post must have a slug.");
-			}
+			const postsCollectionRef = collection(db, "posts");
 
-			// Check if the post exists in the database
-			const postRef = doc(db, "posts", post.slug);
+			// Checks if the post already exists in the database, if it doesn't, creates a new document with an auto-generated ID
+			const postRef = post.id ? doc(postsCollectionRef, post.id) : doc(postsCollectionRef); // auto-generates ID
+
 			const postSnapshot = await getDoc(postRef);
 
-			// Serialize the delta field if it exists
 			const draftPost = {
 				...post,
+				id: postRef.id,
 				postState: "draft",
 				date: new Date().toLocaleDateString("en-CA", {
 					year: "numeric",
@@ -46,31 +45,31 @@ export const databaseHandlers = {
 				delta: JSON.parse(JSON.stringify(post.delta))
 			};
 
-			// Check if the post already exists in the database
 			if (postSnapshot.exists()) {
 				await updateDoc(postRef, draftPost);
 				handleAlertMessage("Changes saved to draft.");
-			} else if (!postSnapshot.exists()) {
+			} else {
 				await setDoc(postRef, draftPost);
 				handleAlertMessage("Blog post saved as a draft.");
 			}
 		} catch (error) {
-			console.error("Error creating blog post: ", error);
+			console.error("Error saving blog post draft: ", error);
 			handleAlertMessage("An error occurred trying to save the blog post.");
 		}
 	},
 
 	publishBlogPost: async (post: BlogPost) => {
 		try {
-			if (!post.slug) {
-				throw new Error("Post must have a slug.");
-			}
+			const postsCollectionRef = collection(db, "posts");
 
-			// Check if the post exists in the database
-			const postRef = doc(db, "posts", post.slug);
+			// Use existing ID or generate a new one
+			const postRef = post.id ? doc(postsCollectionRef, post.id) : doc(postsCollectionRef); // Auto-generates new ID
+
 			const postSnapshot = await getDoc(postRef);
+
 			const publishedPost: BlogPost = {
 				...post,
+				id: postRef.id,
 				postState: "published",
 				date: new Date().toLocaleDateString("en-CA", {
 					year: "numeric",
@@ -81,7 +80,7 @@ export const databaseHandlers = {
 				tags: post.tags,
 				delta: JSON.parse(JSON.stringify(post.delta))
 			};
-			// If it does, and the post is not already in draft state, update it to published state
+
 			if (!postSnapshot.exists()) {
 				await setDoc(postRef, publishedPost);
 				handleAlertMessage("Blog post created and published successfully.");
@@ -99,21 +98,22 @@ export const databaseHandlers = {
 	// This is used when a user wants to restore a blog post that was previously deleted
 	restoreBlogPost: async (post: BlogPost) => {
 		try {
-			if (!post.slug) {
-				throw new Error("Post must have a slug.");
+			if (!post.id) {
+				throw new Error("Post must have an ID to restore.");
 			}
 
-			// Check if the post exists in the database
-			const postRef = doc(db, "posts", post.slug);
+			const postRef = doc(db, "posts", post.id);
 			const postSnapshot = await getDoc(postRef);
 
-			// If it does, and the post is not already in draft or published state, update it to draft state
 			if (!postSnapshot.exists()) {
 				handleAlertMessage("Blog post not found.");
 			} else if (post.postState === "draft" || post.postState === "published") {
 				handleAlertMessage("Blog post is already in draft or published state.");
 			} else {
-				const updatedPost = { ...post, postState: "draft" };
+				const updatedPost = {
+					...post,
+					postState: "draft"
+				};
 				await updateDoc(postRef, updatedPost);
 				handleAlertMessage(`Restored blog post to drafts: ${post.title}`, 5);
 			}
@@ -125,19 +125,22 @@ export const databaseHandlers = {
 
 	deleteBlogPost: async (post: BlogPost) => {
 		try {
-			if (!post.slug) {
-				throw new Error("Post must have a slug.");
+			if (!post.id) {
+				throw new Error("Post must have an ID to delete.");
 			}
-			// Check if the post exists in the database
-			const postRef = doc(db, "posts", post.slug);
+
+			const postRef = doc(db, "posts", post.id);
 			const postSnapshot = await getDoc(postRef);
 
 			if (!postSnapshot.exists()) {
 				handleAlertMessage("Blog post not found.");
 			} else if (post.postState === "deleted") {
 				handleAlertMessage("Blog post has already been deleted.");
-			} else if (postSnapshot.exists() && (post.postState === "draft" || post.postState === "published")) {
-				const updatedPost = { ...post, postState: "deleted" };
+			} else if (post.postState === "draft" || post.postState === "published") {
+				const updatedPost = {
+					...post,
+					postState: "deleted"
+				};
 				await updateDoc(postRef, updatedPost);
 				handleAlertMessage(`Deleted blog post: ${post.title}`, 5);
 			}
@@ -149,18 +152,18 @@ export const databaseHandlers = {
 
 	permanentDeleteBlogPost: async (post: BlogPost) => {
 		try {
-			if (!post.slug) {
-				throw new Error("Post must have a slug.");
+			if (!post.id) {
+				throw new Error("Post must have an ID to be permanently deleted.");
 			}
-			// Check if the post exists in the database
-			const postRef = doc(db, "posts", post.slug);
+
+			const postRef = doc(db, "posts", post.id);
 			const postSnapshot = await getDoc(postRef);
 
 			if (!postSnapshot.exists()) {
 				handleAlertMessage("Blog post not found.");
-			} else if (postSnapshot.exists() && (post.postState === "draft" || post.postState === "published")) {
+			} else if (post.postState === "draft" || post.postState === "published") {
 				handleAlertMessage("Blog post is not in deleted state.");
-			} else if (postSnapshot.exists() && post.postState === "deleted") {
+			} else if (post.postState === "deleted") {
 				await deleteDoc(postRef);
 				handleAlertMessage(`Permanently deleted blog post: ${post.title}`, 5);
 			}
@@ -217,47 +220,53 @@ export const databaseHandlers = {
 		}
 	},
 
-	isSlugUsed: async (slug: string) => {
+	isSlugUsed: async (blog: BlogPost): Promise<boolean | void> => {
 		try {
-			const postRef = doc(db, "posts", slug);
-			const postSnapshot = await getDoc(postRef);
-			if (postSnapshot.exists()) {
-				return true; // Slug is already used
-			} else {
-				return false; // Slug is not used
+			const postsSnapshot = await getDocs(collection(db, "posts"));
+
+			for (const docSnap of postsSnapshot.docs) {
+				const data = docSnap.data();
+
+				// Check if slug matches but ID does not
+				if (data.slug === blog.slug && docSnap.id !== blog.id) {
+					return true;
+				}
 			}
+
+			// No matching slug found on a different ID
+			return false;
 		} catch (error) {
 			console.error("Error checking slug: ", error);
 			handleAlertMessage("An error occurred trying to check the slug.");
 		}
 	},
 
-	isBlogSaved: async (slug: string, blog: BlogPost) => {
-		if (slug === "") {
-			return false; // Slug is not provided
+	isBlogSaved: async (blog: BlogPost): Promise<boolean | void> => {
+		if (!blog.id) {
+			return false; // ID is not provided
 		}
 		try {
-			const postRef = doc(db, "posts", slug);
+			const postRef = doc(db, "posts", blog.id);
 			const postSnapshot = await getDoc(postRef);
+
 			if (!postSnapshot.exists()) {
 				return false; // Blog post is not saved
-			} else if (postSnapshot.exists()) {
-				// check the data in the database is different from the data in the blog object
-				const postData = postSnapshot.data();
-				const isSame =
-					postData.slug === blog.slug &&
-					postData.title === blog.title &&
-					postData.subtitle === blog.subtitle &&
-					postData.html === blog.html &&
-					postData.postState === blog.postState &&
-					postData.author === blog.author &&
-					postData.heroImage === blog.heroImage &&
-					postData.date === blog.date &&
-					JSON.stringify(postData.tags) === JSON.stringify(blog.tags) &&
-					JSON.stringify(postData.delta) === JSON.stringify(blog.delta);
-
-				return isSame; // Blog post is saved
 			}
+
+			const postData = postSnapshot.data();
+			const isSame =
+				postData.slug === blog.slug &&
+				postData.title === blog.title &&
+				postData.subtitle === blog.subtitle &&
+				postData.html === blog.html &&
+				postData.postState === blog.postState &&
+				postData.author === blog.author &&
+				postData.heroImage === blog.heroImage &&
+				postData.date === blog.date &&
+				JSON.stringify(postData.tags) === JSON.stringify(blog.tags) &&
+				JSON.stringify(postData.delta) === JSON.stringify(blog.delta);
+
+			return isSame;
 		} catch (error) {
 			console.error("Error checking if blog is saved: ", error);
 			handleAlertMessage("An error occurred trying to check if the blog is saved.");

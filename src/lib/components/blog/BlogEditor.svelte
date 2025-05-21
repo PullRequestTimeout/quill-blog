@@ -194,7 +194,7 @@
 	async function handleClose() {
 		// Check if input fields are empty, if they aren't, check if the current blog output is different from any of the blog posts in the database
 		// If it is, show confirmation dialog to discard changes
-		const saved = await databaseHandlers.isBlogSaved(blogOutput.slug, $state.snapshot(blogOutput) as BlogPost);
+		const saved = await databaseHandlers.isBlogSaved(blogOutput as BlogPost);
 
 		if ((blogOutput.title || blogOutput.subtitle || blogOutput.slug || blogOutput.html) && saved === false) {
 			handleConfirm("Are you sure you want to quit without saving? Changes have not been saved.", () => {
@@ -266,7 +266,7 @@
 		}
 
 		// Check if the blog post is already saved in the database in it's current state
-		if (await databaseHandlers.isBlogSaved(blogOutput.slug, $state.snapshot(blogOutput) as BlogPost)) {
+		if (await databaseHandlers.isBlogSaved(blogOutput as BlogPost)) {
 			if (blogOutput.postState === "draft") {
 				handleAlertMessage("This blog post is already saved as a draft.");
 				return;
@@ -301,7 +301,7 @@
 			return;
 		}
 
-		if (blogOutput.postState === "published" && (await databaseHandlers.isBlogSaved(blogOutput.slug, $state.snapshot(blogOutput) as BlogPost))) {
+		if (blogOutput.postState === "published" && (await databaseHandlers.isBlogSaved(blogOutput))) {
 			handleAlertMessage("This blog post is already published in its current state.");
 			return;
 		}
@@ -315,13 +315,26 @@
 					month: "2-digit",
 					day: "2-digit"
 				});
-				await databaseHandlers.publishBlogPost(blogOutput);
+				await databaseHandlers.publishBlogPost(blogOutput as BlogPost);
 				handleClearEditor();
 				blogEditorOpen = false;
 				refreshBlogPosts();
 			},
 			blogOutput.title
 		);
+	}
+
+	let slugUsed: boolean = $state(false);
+	async function handleIsSlugUsed() {
+		if (blogOutput.slug) {
+			const isUsed = await databaseHandlers.isSlugUsed(blogOutput);
+			if (isUsed) {
+				handleAlertMessage("This slug is already in use. Please choose a different one.");
+				slugUsed = true;
+			} else {
+				slugUsed = false;
+			}
+		}
 	}
 </script>
 
@@ -336,12 +349,13 @@
 				name="title"
 				type="text"
 				oninput={updateSlug}
+				onblur={handleIsSlugUsed}
 				bind:value={blogOutput.title}
 				placeholder="Blog post title here..."
 				required
 				disabled={blogOutput.postState === "published"}
 			/>
-			<span class="blog-slug">Slug: {blogOutput.slug}</span>
+			<span class="blog-slug" class:slug-used={slugUsed}>Slug: {blogOutput.slug}</span>
 		</label>
 		<label class="blog-input-labels">
 			Subtitle:
@@ -524,6 +538,10 @@
 	span.blog-slug {
 		font-size: 0.75rem;
 		opacity: 0.8;
+	}
+
+	span.blog-slug.slug-used {
+		color: var(--color-error, #ff0000);
 	}
 
 	div.blog-actions {
