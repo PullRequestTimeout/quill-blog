@@ -208,7 +208,7 @@
 	}
 
 	// Add event listener to the esc key, prevent default action, and use to run the handleClose function
-	function handleKeydown(event: KeyboardEvent) {
+	function handleEscKey(event: KeyboardEvent) {
 		if (event.key === "Escape") {
 			event.preventDefault();
 			handleClose();
@@ -218,9 +218,9 @@
 	// This ensures that the modal is closed using the handleClose, so the confirmation dialog and prompt to save is shown
 	$effect(() => {
 		if (blogEditorOpen) {
-			document.addEventListener("keydown", handleKeydown);
+			document.addEventListener("keydown", handleEscKey);
 		} else {
-			document.removeEventListener("keydown", handleKeydown);
+			document.removeEventListener("keydown", handleEscKey);
 		}
 	});
 
