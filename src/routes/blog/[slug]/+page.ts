@@ -1,18 +1,17 @@
 import { error } from "@sveltejs/kit";
 import type { PageLoad } from "./$types";
 import { databaseHandlers } from "$lib/firebase/db";
-import type { BlogPost } from "$lib/components/blog/blogOutput.svelte";
 
 export const load: PageLoad = async ({ params }) => {
-	// Find the blog with the matching slug in the JSON file
-	const blogs = await databaseHandlers.getAllBlogPosts();
-	const blog = blogs.find((blog: BlogPost) => blog.slug === params.slug);
-	if (blog) {
+	// Find the blog with the matching slug in the DB
+	const blog = await databaseHandlers.getBlogPostBySlug(params.slug);
+	if (!blog) {
+		// If the blog is not found, return a 404 error
+		error(404, "Not found");
+	} else if (blog) {
 		return {
 			status: 200,
 			blog
 		};
 	}
-
-	error(404, "Not found");
 };

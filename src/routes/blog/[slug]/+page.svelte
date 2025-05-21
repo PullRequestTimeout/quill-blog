@@ -18,20 +18,22 @@
 
 	let readingTime: number = $state(0);
 	$effect(() => {
-		readingTime = readingTimeFromHTML(data.blog.html);
+		readingTime = readingTimeFromHTML(data.blog?.html ?? "");
 	});
 </script>
 
 <svelte:head>
-	<title>{data.blog.title} | Blog</title>
-	<meta name="description" content={`${data.blog.title} — ${data.blog.subtitle} | `} />
+	<title>{data.blog?.title} | Blog</title>
+	<meta name="description" content={`${data.blog?.title} — ${data.blog?.subtitle}`} />
 </svelte:head>
 
 <main>
 	<section class="blog-header">
-		<h1>{data.blog.title}</h1>
-		<p>{data.blog.subtitle}</p>
-		<p class="blog-date">{formatDate(data.blog.date)}</p>
+		<h1>{data.blog?.title}</h1>
+		<p>{data.blog?.subtitle}</p>
+		{#if data.blog?.date}
+			<p class="blog-date">{formatDate(data.blog.date)}</p>
+		{/if}
 		<hr />
 	</section>
 	<section class="blog-body" class:columns={data.publishedBlogPosts.length > 0}>
@@ -39,10 +41,10 @@
 			{#if !!readingTime}
 				<p>Estimated reading time — {readingTime}min</p>
 			{/if}
-			{@html data.blog.html}
+			{@html data.blog?.html}
 			<hr />
 			<div class="blog-footer">
-				<p>Written by <span>{data.blog.author}</span></p>
+				<p>Written by <span>{data.blog?.author}</span></p>
 				<a class="button-link" href="/blog">Back to blog</a>
 			</div>
 		</div>
@@ -50,7 +52,7 @@
 			{#if data.publishedBlogPosts.length > 1}
 				<h2>Recent Articles</h2>
 				<div class="blog-posts-container">
-					{#each data.publishedBlogPosts.filter((post: BlogPost) => post.slug !== data.blog.slug).slice(0, 3) as post}
+					{#each data.publishedBlogPosts.filter((post: BlogPost) => post.slug !== data.blog?.slug).slice(0, 3) as post}
 						<div class="blog-card surface">
 							<!-- <img src={post.cardImage} alt={post.title} /> -->
 							<div>
