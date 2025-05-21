@@ -291,8 +291,14 @@
 		);
 	}
 
-	function handlePreview() {
-		handleAlertMessage("Preview feature is not implemented yet.");
+	async function handlePreview() {
+		// Ensures essential fields are filled
+		if (!blogOutput.title || !blogOutput.subtitle || !blogOutput.html) {
+			handleAlertMessage("Please fill in the title, subtitle, and content before previewing.");
+			return;
+		}
+		await databaseHandlers.previewBlogPost(blogOutput as BlogPost);
+		return;
 	}
 
 	async function handlePublish() {
