@@ -303,15 +303,15 @@ export const databaseHandlers = {
 			const isSaved = await databaseHandlers.isBlogSaved(blog);
 			// Already saved in the database, no need to save again
 			if (isSaved) {
-				handleAlertMessage("Previewing blog post.");
 				goto(`/blog/preview/${blog.slug}`);
+				handleAlertMessage("Previewing blog post.");
 				return;
 			}
 
 			if (blog.postState === "draft" || blog.postState === "unsaved") {
 				await databaseHandlers.saveDraftBlogPost(blog);
-				handleAlertMessage("Draft saved. Previewing blog post.");
 				goto(`/blog/preview/${blog.slug}`);
+				handleAlertMessage("Draft saved. Previewing blog post.");
 				return;
 			}
 
@@ -328,8 +328,8 @@ export const databaseHandlers = {
 					id: previewId
 				};
 				await setDoc(previewRef, previewPost);
-				handleAlertMessage("Previewing unsaved blog post.");
 				goto(`/blog/preview/${blog.slug}`);
+				handleAlertMessage("Previewing unsaved blog post.");
 				return;
 			}
 			// On the preview page, give users the option to save the blog post as a draft

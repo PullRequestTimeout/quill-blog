@@ -297,6 +297,13 @@
 			handleAlertMessage("Please fill in the title, subtitle, and content before previewing.");
 			return;
 		}
+
+		// Keep blogOutput aligned with the current preview
+		if (blogOutput.postState === "published" && (await databaseHandlers.isBlogSaved(blogOutput)) === false) {
+			const id = blogOutput.id;
+			blogOutput.id = `preview-${id}`;
+		}
+
 		await databaseHandlers.previewBlogPost(blogOutput as BlogPost);
 		return;
 	}
