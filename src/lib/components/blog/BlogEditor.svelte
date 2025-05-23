@@ -29,6 +29,7 @@
 	let wordCount = $state(0);
 	let charCount = $state(0);
 	let selectedTags: string[] = $state([]);
+	let hasChanges: boolean = $state(false);
 
 	// Props
 	let { blogEditorOpen = $bindable(false) }: { blogEditorOpen: boolean } = $props();
@@ -67,12 +68,18 @@
 
 		let delta: Delta = quill.getContents();
 
+		// Set the initial value of the word and character count
+		const text = quill.getText().trim();
+		charCount = text.length;
+		wordCount = text === "" ? 0 : text.split(/\s+/).length;
+
 		// Update the output on text change
 		quill.on("text-change", () => {
 			blogOutput.html = quill.getSemanticHTML();
 			delta = quill.getContents();
 			blogOutput.delta = delta;
 
+			// Update the count on text change
 			const text = quill.getText().trim();
 			charCount = text.length;
 			wordCount = text === "" ? 0 : text.split(/\s+/).length;
@@ -398,7 +405,7 @@
 	<div class="blog-actions">
 		<button class="button" onclick={handleSaveDraft}><span class="material-icons">save</span>Save Draft</button>
 		<button class="button" onclick={handlePreview}><span class="material-icons">preview</span>Preview</button>
-		<button class="button" onclick={handleClose}><span class="material-icons">delete</span>Discard</button>
+		<button class="button" onclick={handleClose}><span class="material-icons">delete</span>Discard Changes</button>
 		<button class="button button-primary" onclick={handlePublish}><span class="material-icons">publish</span>Publish</button>
 	</div>
 	{#if uiStore.alertMessage}
