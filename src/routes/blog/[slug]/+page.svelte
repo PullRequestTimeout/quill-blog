@@ -29,6 +29,9 @@
 
 <main>
 	<section class="blog-header">
+		{#if data.blog?.heroImage}
+			<img class="blog-hero-image" src={data.blog?.heroImage} alt="hero" />
+		{/if}
 		<h1>{data.blog?.title}</h1>
 		<p>{data.blog?.subtitle}</p>
 		{#if data.blog?.date}
