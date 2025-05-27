@@ -77,13 +77,17 @@
 	}
 
 	async function handleDiscardChanges() {
-		// confirmationOpen = true;
-		// message = "Are you sure you want to discard your changes? This action cannot be undone.";
-		// confirmFunc = async () => {
-		// 	await databaseHandlers.permanentDeleteBlogPost(data.blog);
-		// 	handleAlertMessage("Changes discarded.");
-		// 	goto(`/blog/admin`);
-		// };
+		confirmationOpen = true;
+		message = "Are you sure you want to discard your changes? This action cannot be undone.";
+		confirmFunc = async () => {
+			if (data.blog?.id.includes("preview")) {
+				await databaseHandlers.permanentDeleteBlogPost(data.blog);
+			}
+			handleAlertMessage("Changes discarded.", 5000);
+			setTimeout(() => {
+				goto(`/blog/admin`);
+			}, 2000);
+		};
 	}
 </script>
 
@@ -116,7 +120,9 @@
 				<a class="button-link" href="/blog">Back to blog</a>
 			</div>
 			<div class="blog-preview-actions">
-				<button class="button" onclick={handleDiscardChanges}><span class="material-icons">delete</span>Discard Changes</button>
+				{#if data.blog?.id.includes("preview")}
+					<button class="button" onclick={handleDiscardChanges}><span class="material-icons">delete</span>Discard Changes</button>
+				{/if}
 				<button class="button" onclick={handleContinueEdit}><span class="material-icons">edit</span>Continue Editing</button>
 				{#if !data.blog?.id.includes("preview")}
 					<button class="button" onclick={handleSaveDraft}><span class="material-icons">save</span>Save Draft</button>
@@ -132,7 +138,7 @@
 				<div class="blog-posts-container">
 					{#each data.publishedBlogPosts.filter((post: BlogPost) => post.slug !== data.blog?.slug).slice(0, 3) as post}
 						<div class="blog-card surface">
-							<!-- <img src={post.cardImage} alt={post.title} /> -->
+							<!-- <img src={post.heroImage} alt={post.title} /> -->
 							<div>
 								<p>{post.author} — <span>{formatDate(post.date)}</span></p>
 							</div>
