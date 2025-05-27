@@ -6,6 +6,11 @@
 	import { authHandlers } from "$lib/firebase/auth";
 </script>
 
+<svelte:head>
+	<title>Admin | Blog</title>
+	<meta name="description" content={"Admin panel for blogging"} />
+</svelte:head>
+
 <main>
 	<a class="button-link" href="/blog">Back</a>
 	{#if !uiStore.loggedIn}
