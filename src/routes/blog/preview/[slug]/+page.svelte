@@ -8,6 +8,12 @@
 	import { databaseHandlers } from "$lib/firebase/db";
 	import { goto } from "$app/navigation";
 
+	import Confirmation from "$lib/components/Confirmation.svelte";
+	import { handleAlertMessage } from "$lib/stores/uiStore.svelte";
+	let confirmationOpen = $state(false);
+	let confirmFunc = $state(() => {});
+	let message = $state("");
+
 	function readingTimeFromHTML(html: string): number {
 		const wordsPerMinute = 200;
 
@@ -45,14 +51,39 @@
 
 	// WIP
 	async function handlePublish() {
-		const isSaved = await databaseHandlers.isBlogSaved(blogOutput);
-		// Implement publish functionality
-		// if (data.blog?.postState !== "published") {
-		// 	// Confirm changes and publish
-		// 	databaseHandlers.publishBlogPost(data.blog);
-		// } else {
-		// 	//merge changes from "preview-id" into "id", delete "preview-id", and then publish
-		// }
+		const blogObject: BlogPost = {
+			...data.blog,
+			id: data.blog.id.includes("preview-") ? data.blog.id.replace(/^preview-/, "") : data.blog.id,
+			postState: "published",
+			date: new Date().toLocaleDateString("en-CA", {
+				year: "numeric",
+				month: "2-digit",
+				day: "2-digit"
+			})
+		};
+
+		confirmationOpen = true;
+		message = "Are you sure you're ready to publish this blog post?";
+		confirmFunc = async () => {
+			if (data.blog?.id.includes("preview")) {
+				await databaseHandlers.permanentDeleteBlogPost(data.blog);
+			}
+			await databaseHandlers.publishBlogPost(blogObject);
+			handleAlertMessage("Blog post published successfully.");
+			setTimeout(() => {
+				goto(`/blog/${data.blog.slug}`);
+			}, 2000);
+		};
+	}
+
+	async function handleDiscardChanges() {
+		// confirmationOpen = true;
+		// message = "Are you sure you want to discard your changes? This action cannot be undone.";
+		// confirmFunc = async () => {
+		// 	await databaseHandlers.permanentDeleteBlogPost(data.blog);
+		// 	handleAlertMessage("Changes discarded.");
+		// 	goto(`/blog/admin`);
+		// };
 	}
 </script>
 
@@ -62,6 +93,9 @@
 </svelte:head>
 
 <main>
+	{#if data.blog?.heroImage}
+		<img class="blog-hero-image" src={data.blog?.heroImage} alt="hero" />
+	{/if}
 	<section class="blog-header">
 		<h1>{data.blog?.title} - (Preview)</h1>
 		<p>{data.blog?.subtitle}</p>
@@ -82,12 +116,13 @@
 				<a class="button-link" href="/blog">Back to blog</a>
 			</div>
 			<div class="blog-preview-actions">
+				<button class="button" onclick={handleDiscardChanges}><span class="material-icons">delete</span>Discard Changes</button>
 				<button class="button" onclick={handleContinueEdit}><span class="material-icons">edit</span>Continue Editing</button>
-				{#if data.blog?.postState === "draft"}
+				{#if !data.blog?.id.includes("preview")}
 					<button class="button" onclick={handleSaveDraft}><span class="material-icons">save</span>Save Draft</button>
 				{/if}
 				<button class="button button-primary" onclick={handlePublish}
-					><span class="material-icons">publish</span>Publish{data.blog?.postState === "published" ? " Changes" : ""}</button
+					><span class="material-icons">publish</span>Publish{data.blog?.id.includes("preview") ? " Changes" : ""}</button
 				>
 			</div>
 		</div>
@@ -111,6 +146,7 @@
 		</div>
 	</section>
 </main>
+<Confirmation bind:confirmationOpen {confirmFunc} {message} />
 
 <style>
 	section.blog-header {
