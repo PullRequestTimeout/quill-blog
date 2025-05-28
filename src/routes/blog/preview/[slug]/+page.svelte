@@ -76,6 +76,7 @@
 				await databaseHandlers.permanentDeleteBlogPost(data.blog);
 			}
 			handleAlertMessage("Changes discarded.", 5000);
+			uiStore.blogEditorOpen = false;
 			setTimeout(() => {
 				goto(`/blog/admin`);
 			}, 2000);
