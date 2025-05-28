@@ -57,7 +57,7 @@
 				<div class="blog-posts-container">
 					{#each data.publishedBlogPosts.filter((post: BlogPost) => post.slug !== data.blog?.slug).slice(0, 3) as post}
 						<div class="blog-card surface">
-							<!-- <img src={post.cardImage} alt={post.title} /> -->
+							<!-- <img src={post.heroImage} alt={post.title} /> -->
 							<div>
 								<p>{post.author} — <span>{formatDate(post.date)}</span></p>
 							</div>
