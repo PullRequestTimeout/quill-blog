@@ -11,6 +11,7 @@
 	// Svelte Imports
 	import { onMount } from "svelte";
 	import { fade, fly } from "svelte/transition";
+	import { goto } from "$app/navigation";
 
 	// Utils Imports
 	import { blogOutput, updateSlug, authorsRegistered } from "$lib/components/blog/blogOutput.svelte";
@@ -300,19 +301,46 @@
 
 	async function handlePreview() {
 		// Ensures essential fields are filled
+		const isSaved = await databaseHandlers.isBlogSaved(blogOutput as BlogPost);
+
 		if (!blogOutput.title || !blogOutput.subtitle || !blogOutput.html) {
 			handleAlertMessage("Please fill in the title, subtitle, and content before previewing.");
 			return;
 		}
 
-		// Keep blogOutput aligned with the current preview
-		if (blogOutput.postState === "published" && (await databaseHandlers.isBlogSaved(blogOutput)) === false) {
-			const id = blogOutput.id;
-			blogOutput.id = `preview-${id}`;
+		if (blogOutput.postState === "published" && isSaved) {
+			handleAlertMessage("This blog post is already published in its current state.");
+			return;
 		}
 
-		await databaseHandlers.previewBlogPost(blogOutput as BlogPost);
-		return;
+		if (blogOutput.postState === "draft" && isSaved) {
+			goto(`/blog/preview/${blogOutput.slug}`);
+			return;
+		}
+
+		if (blogOutput.postState === "unsaved" || (blogOutput.postState === "draft" && !isSaved)) {
+			// Save draft and the goto preview
+			blogOutput.postState = "draft";
+			blogOutput.date = new Date().toLocaleDateString("en-CA", {
+				year: "numeric",
+				month: "2-digit",
+				day: "2-digit"
+			});
+			await databaseHandlers.saveDraftBlogPost(blogOutput);
+			handleAlertMessage("Draft saved.");
+			goto(`/blog/preview/${blogOutput.slug}`);
+			return;
+		}
+
+		// Keep blogOutput aligned with the current preview
+		if (blogOutput.postState === "published" && !isSaved) {
+			const id = blogOutput.id;
+			blogOutput.id = `preview-${id}`;
+			await databaseHandlers.saveDraftBlogPost(blogOutput as BlogPost);
+			handleAlertMessage("Previewing changes.");
+			goto(`/blog/preview/${blogOutput.slug}?id=${blogOutput.id}`);
+			return;
+		}
 	}
 
 	async function handlePublish() {
