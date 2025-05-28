@@ -7,7 +7,6 @@ import { handleAlertMessage } from "$lib/stores/uiStore.svelte";
 
 // Blog dependencies
 import type { BlogPost } from "$lib/components/blog/blogOutput.svelte";
-import { goto } from "$app/navigation";
 
 export const databaseHandlers = {
 	getAllBlogPosts: async () => {
@@ -44,6 +43,26 @@ export const databaseHandlers = {
 			return blogPost;
 		} catch (error) {
 			console.error("Error getting blog post by slug: ", error);
+			handleAlertMessage("An error occurred trying to retrieve the blog post.");
+			return null;
+		}
+	},
+
+	// get a single blog post by ID
+	getBlogPostById: async (id: string): Promise<BlogPost | null> => {
+		try {
+			const postRef = doc(db, "posts", id);
+			const postSnapshot = await getDoc(postRef);
+
+			if (!postSnapshot.exists()) {
+				handleAlertMessage("Blog post not found.");
+				return null;
+			}
+
+			const blogPost = { ...postSnapshot.data(), id: postSnapshot.id } as BlogPost;
+			return blogPost;
+		} catch (error) {
+			console.error("Error getting blog post by ID: ", error);
 			handleAlertMessage("An error occurred trying to retrieve the blog post.");
 			return null;
 		}
@@ -187,11 +206,8 @@ export const databaseHandlers = {
 
 			if (!postSnapshot.exists()) {
 				handleAlertMessage("Blog post not found.");
-			} else if (post.postState === "draft" || post.postState === "published") {
-				handleAlertMessage("Blog post is not in deleted state.");
-			} else if (post.postState === "deleted") {
+			} else {
 				await deleteDoc(postRef);
-				handleAlertMessage(`Permanently deleted blog post: ${post.title}`, 5);
 			}
 		} catch (error) {
 			console.error("Error permanently deleting blog post: ", error);
@@ -296,49 +312,6 @@ export const databaseHandlers = {
 		} catch (error) {
 			console.error("Error checking if blog is saved: ", error);
 			handleAlertMessage("An error occurred trying to check if the blog is saved.");
-		}
-	},
-	previewBlogPost: async (blog: BlogPost) => {
-		try {
-			const isSaved = await databaseHandlers.isBlogSaved(blog);
-			// Already saved in the database, no need to save again
-			if (isSaved) {
-				goto(`/blog/preview/${blog.slug}`);
-				handleAlertMessage("Previewing blog post.");
-				return;
-			}
-
-			if (blog.postState === "draft" || blog.postState === "unsaved") {
-				await databaseHandlers.saveDraftBlogPost(blog);
-				goto(`/blog/preview/${blog.slug}`);
-				handleAlertMessage("Draft saved. Previewing blog post.");
-				return;
-			}
-
-			if (blog.postState === "deleted") {
-				handleAlertMessage("Blog post is deleted. Please restore it to preview.");
-				return;
-			}
-
-			if (blog.postState === "published") {
-				const previewId = `preview-${blog.id}`;
-				const previewRef = doc(db, "posts", previewId);
-				const previewPost = {
-					...blog,
-					id: previewId
-				};
-				await setDoc(previewRef, previewPost);
-				goto(`/blog/preview/${blog.slug}`);
-				handleAlertMessage("Previewing unsaved blog post.");
-				return;
-			}
-			// On the preview page, give users the option to save the blog post as a draft
-			// or publish it. If they choose to save it as a draft, call the saveDraftBlogPost function
-			// If they choose to publish it, call the publishBlogPost function
-			// The original blog post in the db should at that point be updated to the new state and then the preview post should be deleted
-		} catch (error) {
-			console.error("Error preparing blog post preview:", error);
-			handleAlertMessage("An error occurred trying to preview the blog post.");
 		}
 	}
 };
