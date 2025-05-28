@@ -9,7 +9,7 @@
 	import { goto } from "$app/navigation";
 
 	import Confirmation from "$lib/components/Confirmation.svelte";
-	import { handleAlertMessage } from "$lib/stores/uiStore.svelte";
+	import { handleAlertMessage, uiStore } from "$lib/stores/uiStore.svelte";
 	let confirmationOpen = $state(false);
 	let confirmFunc = $state(() => {});
 	let message = $state("");
@@ -31,25 +31,17 @@
 		readingTime = readingTimeFromHTML(data.blog?.html ?? "");
 	});
 
-	function handleSaveDraft() {
-		// databaseHandlers.saveDraftBlogPost(data.blog);
+	async function handleContinueEdit() {
+		// Populate the blogOutput with the current blog data and navigate to the editor
+		Object.assign(blogOutput, data.blog);
+		uiStore.blogEditorOpen = true;
+		if (data.blog?.id.includes("preview")) {
+			blogOutput.id = data.blog.id.replace(/^preview-/, "");
+			await databaseHandlers.permanentDeleteBlogPost(data.blog);
+		}
+		goto(`/blog/admin`);
 	}
 
-	// WIP
-	function handleContinueEdit() {
-		// if (data.blog?.postState === "draft") {
-		// 	goto("/blog/admin");
-		// 	return;
-		// } else if (data.blog?.postState === "published") {
-		// 	goto(`/blog/${data.blog.slug}/edit`);
-		// 	return;
-		// } else {
-		// 	goto("/blog");
-		// 	return;
-		// }
-	}
-
-	// WIP
 	async function handlePublish() {
 		const blogObject: BlogPost = {
 			...data.blog,
@@ -124,9 +116,6 @@
 					<button class="button" onclick={handleDiscardChanges}><span class="material-icons">delete</span>Discard Changes</button>
 				{/if}
 				<button class="button" onclick={handleContinueEdit}><span class="material-icons">edit</span>Continue Editing</button>
-				{#if !data.blog?.id.includes("preview")}
-					<button class="button" onclick={handleSaveDraft}><span class="material-icons">save</span>Save Draft</button>
-				{/if}
 				<button class="button button-primary" onclick={handlePublish}
 					><span class="material-icons">publish</span>Publish{data.blog?.id.includes("preview") ? " Changes" : ""}</button
 				>
