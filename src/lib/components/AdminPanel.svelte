@@ -8,10 +8,15 @@
 	import type { BlogPost, BlogPostState } from "$lib/components/blog/blogOutput.svelte";
 	import { refreshBlogPosts, blogPostsArr } from "$lib/utils/refreshBlogPosts.svelte";
 	import { uiStore } from "$lib/stores/uiStore.svelte";
+	import { handleAlertMessage } from "$lib/stores/uiStore.svelte";
 
 	onMount(async () => {
 		// Fetch blog posts when the component mounts
 		await refreshBlogPosts();
+		console.log(uiStore.blogEditorOpen);
+		if (uiStore.blogEditorOpen) {
+			blogEditorOpen = true;
+		}
 	});
 
 	// Components & Utils
@@ -22,7 +27,7 @@
 	import { onMount } from "svelte";
 
 	// Edit blog post functionality
-	let blogEditorOpen = $state(false);
+	let blogEditorOpen = $state(uiStore.blogEditorOpen || false);
 	$effect(() => {
 		// Controls toast component visibility. If the blog editor is open, the internal toast will be used instead of the global one.
 		if (blogEditorOpen) {
@@ -78,6 +83,7 @@
 		confirmFunc = async () => {
 			await databaseHandlers.permanentDeleteBlogPost(blog);
 			await refreshBlogPosts();
+			handleAlertMessage(`Permanently deleted blog post: ${blog.title}`, 5);
 		};
 	}
 </script>
