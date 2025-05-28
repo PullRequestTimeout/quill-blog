@@ -13,7 +13,6 @@
 	onMount(async () => {
 		// Fetch blog posts when the component mounts
 		await refreshBlogPosts();
-		console.log(uiStore.blogEditorOpen);
 		if (uiStore.blogEditorOpen) {
 			blogEditorOpen = true;
 		}
