@@ -1,8 +1,8 @@
 import { error } from "@sveltejs/kit";
-import type { PageLoad } from "./$types";
+import type { PageServerLoad } from "./$types";
 import { databaseHandlers } from "$lib/firebase/db";
 
-export const load: PageLoad = async ({ params }) => {
+export const load: PageServerLoad = async ({ params }) => {
 	// Find the blog with the matching slug in the DB
 	const blog = await databaseHandlers.getBlogPostBySlug(params.slug);
 	if (!blog) {
